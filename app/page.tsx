@@ -20,7 +20,7 @@ export default function Home() {
             width={40}
             height={20}
           />
-        <h1>Little Guard</h1>
+          <h1>Little Guard</h1>
         </div>
         <div className={styles.status}>
           {/* //todo replace with actual connection status */}

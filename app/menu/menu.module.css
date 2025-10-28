@@ -1,0 +1,122 @@
+.codeDisplay {
+  font-family: 'Courier New', Courier, monospace;
+  background: var(--card-border);
+  padding: 16px;
+  margin-top: 16px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  text-align: center;
+  user-select: all;
+  width: 80%;
+}
+
+.menuContainer {
+    padding-left: 2rem;
+    padding-right: 2rem;
+    background: var(--background);
+}
+
+.main {
+  min-height: 100vh;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  background: var(--background);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  margin-top: 0;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--card-border);   
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoutButton {
+  padding : 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 8em;
+}
+
+.logoutButton:hover {
+  background: var(--primary-hover);
+}
+
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.mainContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.mainContent h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.pairingSection,
+.devicesSection {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 2px 8px var(--card);
+}
+
+.codeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.codeButton {
+  padding : 8px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 12em;
+}
+
+.codeButton:hover {
+  background: var(--primary-hover);
+}
