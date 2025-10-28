@@ -1,0 +1,21 @@
+.main {
+  min-height: 100vh;
+  padding: 2rem;
+  background: var(--background);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.connected {
+  color: var(--success);
+}
+
+.disconnected {
+  color: var(--warning);
+}
