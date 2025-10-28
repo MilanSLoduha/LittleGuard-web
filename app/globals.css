@@ -3,6 +3,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card: #1a1a1a;
+  --card-border: #2a2a2a;
+  --primary: #ff3034;
+  --primary-hover: #ff494d;
+  --success: #4ade80;
+  --warning: #fbbf24;
 }
 
 @theme inline {

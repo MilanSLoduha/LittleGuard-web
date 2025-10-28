@@ -1,7 +1,30 @@
 .main {
   min-height: 100vh;
-  padding: 2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
   background: var(--background);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  margin-top: 0;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.connected {
+  color: var(--success);
+}
+
+.disconnected {
+  color: var(--warning);
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .header {
@@ -12,10 +35,57 @@
   padding: 1rem 0;
   border-bottom: 1px solid var(--card-border);
 }
-.connected {
-  color: var(--success);
+
+.status {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.disconnected {
-  color: var(--warning);
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 1.5rem;
+  grid-template-rows: auto auto;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.streamCard {
+  grid-row: span 2;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settingsCard {
+  grid-column: span 2;
+}
+
+.menuButton {
+  padding : 8px 32px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.menuButton:hover {
+  background: var(--primary-hover);
 }
