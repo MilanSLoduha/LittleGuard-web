@@ -9,12 +9,17 @@ import { signOut } from 'next-auth/react'
 
 export default function menuPage() {
   const router = useRouter()
+  const [random, setRandom] = useState('------')
 
     const handleLogout = async () => {
         await signOut({ redirect: false })
         router.push('/login')
     }
-    
+
+    const randomNumber = () => {
+      const newNum = Math.floor(Math.random() * 999999);
+      setRandom(String(newNum).padStart(6, '0'));
+    }
     return (
     <div className={styles.menuContainer}>
       <header className={styles.header}>
@@ -46,9 +51,9 @@ export default function menuPage() {
           </p>
           <div className={styles.codeContainer}>
             <div className={styles.codeDisplay}>
-              <p>123456</p>
+              <p>{random}</p>
             </div>
-            <button className={styles.codeButton}>
+            <button className={styles.codeButton} onClick={randomNumber}>
               Vygenerovať nový kód
             </button>
           </div>

@@ -20,9 +20,33 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError('Heslá sa nezhodujú')
+      return
+    }
+    
     setLoading(true)
 
     try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Chyba pri registrácii')
+        return
+      }
+
       const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
@@ -30,13 +54,13 @@ export default function RegisterPage() {
       })
 
       if (result?.error) {
-        setError('Nesprávny email alebo heslo')
+        setError('Registrácia úspešná, ale nepodarilo sa prihlásiť')
       } else {
-        router.push('/dashboard')
+        router.push('/')
         router.refresh()
       }
     } catch (error) {
-      setError('Chyba pri prihlásení')
+      setError('Chyba pri registrácii')
     } finally {
       setLoading(false)
     }

@@ -7,6 +7,9 @@ import { useState } from 'react'
   
 export default function Home() {
   const router = useRouter()
+  const [temperature, setTemperature] = useState('--.-')
+  const [motion, setMotion] = useState('---')
+  const [lastMotion, setLastMotion] = useState('---')
   const [selectedMode, setSelectedMode] = useState('mode1')
   const [selectedResolution, setSelectedResolution] = useState('resolution1')
   const [quality, setQuality] = useState(10)
@@ -83,9 +86,22 @@ export default function Home() {
           <div className={styles.card}>
             <div className={styles.block}>
               <h2>Údaje</h2>
-              <p>Teplota:</p>
-              <p>Pohyb:</p>
-              <p>Posledný pohyb:</p>
+
+              <div className={styles.infoBox}>
+                <span>Teplota:</span>
+                <p>{temperature} °  C</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <span>Pohyb:</span>
+                <p>{motion}</p>
+              </div>
+
+              <div className={styles.infoBox}>
+                <span>Posledný pohyb:</span>
+                <p>{lastMotion}</p>
+              </div>
+
             </div>
             <div className={styles.block}>
 
