@@ -60,17 +60,20 @@
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0.5rem;
 }
 
 .streamCard {
   grid-row: span 2;
+  height: fit-content;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .settingsCard {
@@ -92,3 +95,88 @@
   background: var(--primary-hover);
 }
 
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 1rem;
+}
+
+.block h2 {
+  font-weight: 700;
+  font-size: 1.3rem;
+  align-self: center;
+}
+
+.select {
+  padding: 10px;
+  border: 2px solid var(--card-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--card-border);
+  cursor:pointer;
+}
+
+.option {
+  padding: 8px;
+  color: white;
+  background-color: var(--card-border);
+} 
+
+.slider {
+  width: 100%;
+  margin-left: 0;
+  margin-top: 8px;
+  margin-right: 0;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  appearance: none;
+  background: var(--primary);
+  height: 6px;
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  padding-right: 0px;
+  margin-right: 0px;
+  cursor: pointer;
+}
+
+.switchBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0;
+}
+
+.selectionBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 0;
+}
+
+.input{
+  background-color: var(--card-border);
+  border-radius: 8px;
+  padding-left: 0.25rem;
+  padding-bottom: 0.05rem;
+  padding-top: 0.05rem;
+  cursor: pointer;
+}
+
+.daysContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dayCheckbox input{
+  cursor: pointer;
+} 
