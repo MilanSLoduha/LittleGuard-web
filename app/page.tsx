@@ -3,15 +3,17 @@
 import Image from "next/image";
 import styles from './page.module.css'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useMQTT } from '@/hooks/useMQTT'
+
   
 export default function Home() {
   const router = useRouter()
-  const [temperature, setTemperature] = useState('--.-')
-  const [motion, setMotion] = useState('---')
-  const [lastMotion, setLastMotion] = useState('---')
+
+  const { temperature, motion, lastMotion, isConnected, settings, sendCommand } = useMQTT()
+
   const [selectedMode, setSelectedMode] = useState('mode1')
-  const [selectedResolution, setSelectedResolution] = useState('resolution1')
+  const [selectedResolution, setSelectedResolution] = useState('1')
   const [quality, setQuality] = useState(10)
   const [brightness, setBrightness] = useState(0)
   const [contrast, setContrast] = useState(0)
@@ -22,6 +24,8 @@ export default function Home() {
   const [hwDownscale, setHwDownscale] = useState(false)
   const [awb, setAwb] = useState(false)
   const [aec, setAec] = useState(false)
+  const [startTime, setStartTime] = useState('00:00')
+  const [endTime, setEndTime] = useState('23:59')
   const [notificatinonDays, setNotificationDays] = useState({
     monday: false,
     tuesday: false,
@@ -31,6 +35,34 @@ export default function Home() {
     saturday: false,
     sunday: false
   })
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.mode) setSelectedMode(settings.mode)
+      if (settings.resolution) setSelectedResolution(settings.resolution)
+      if (settings.quality !== undefined) setQuality(settings.quality)
+      if (settings.brightness !== undefined) setBrightness(settings.brightness)
+      if (settings.contrast !== undefined) setContrast(settings.contrast)
+      if (settings.phoneNumber) setPhoneNumber(settings.phoneNumber)
+      if (settings.sendSMS !== undefined) setSendSMS(settings.sendSMS)
+      if (settings.hFlip !== undefined) setHorizontalFlip(settings.hFlip)
+      if (settings.hwDownscale !== undefined) setHwDownscale(settings.hwDownscale)
+      if (settings.awb !== undefined) setAwb(settings.awb)
+      if (settings.aec !== undefined) setAec(settings.aec)
+      if (settings.startTime) setStartTime(settings.startTime)
+      if (settings.endTime) setEndTime(settings.endTime)
+      
+      setNotificationDays({
+        monday: settings.monday ?? false,
+        tuesday: settings.tuesday ?? false,
+        wednesday: settings.wednesday ?? false,
+        thursday: settings.thursday ?? false,
+        friday: settings.friday ?? false,
+        saturday: settings.saturday ?? false,
+        sunday: settings.sunday ?? false
+      })
+    }
+  }, [settings])
 
   const handleDayNotification = (day: keyof typeof notificatinonDays) => {
     const days = Object.keys(notificatinonDays);
@@ -42,6 +74,32 @@ export default function Home() {
       newNotificationDays[foundDay as keyof typeof notificatinonDays] = newValue;
       setNotificationDays(newNotificationDays);
     }
+  }
+
+  const handleSendSettings = () => {
+    sendCommand({
+      type: 'settings',
+      mode: selectedMode,
+      resolution: selectedResolution,
+      quality: quality,
+      brightness: brightness,
+      contrast: contrast,
+      horizontalFlip: horizontalFlip,
+      hwDownscale: hwDownscale,
+      awb: awb,
+      aec: aec,
+      phoneNumber: phoneNumber,
+      sendSMS: sendSMS,
+      monday: notificatinonDays.monday,
+      tuesday: notificatinonDays.tuesday,
+      wednesday: notificatinonDays.wednesday,
+      thursday: notificatinonDays.thursday,
+      friday: notificatinonDays.friday,
+      saturday: notificatinonDays.saturday,
+      sunday: notificatinonDays.sunday,
+      startTime: startTime,
+      endTime: endTime
+    })
   }
 
 
@@ -58,9 +116,8 @@ export default function Home() {
           <h1>Little Guard</h1>
         </div>
         <div className={styles.status}>
-          {/* //todo replace with actual connection status */}
-          <span className={true ? styles.connected : styles.disconnected}> 
-            {true ? 'Pripojené' : 'Odpojené'}
+          <span className={isConnected ? styles.connected : styles.disconnected}> 
+            {isConnected ? 'Pripojené' : 'Odpojené'}
           </span>
           <button onClick={() => router.push('/menu')} className={styles.menuButton}>
             Menu
@@ -89,17 +146,17 @@ export default function Home() {
 
               <div className={styles.infoBox}>
                 <span>Teplota:</span>
-                <p>{temperature} °  C</p>
+                <p>{temperature !== null ? `${temperature} °C` : '--.-'}</p>
               </div>
 
               <div className={styles.infoBox}>
                 <span>Pohyb:</span>
-                <p>{motion}</p>
+                <p>{motion ? 'Detekovaný' : 'Žiadny'}</p>
               </div>
 
               <div className={styles.infoBox}>
                 <span>Posledný pohyb:</span>
-                <p>{lastMotion}</p>
+                <p>{lastMotion || 'Žiadny'}</p>
               </div>
 
             </div>
@@ -127,12 +184,12 @@ export default function Home() {
                   onChange={(e) => setSelectedResolution(e.target.value)}
                   className={styles.select}
                 >
-                  <option value="resolution1" className={styles.option}>UXGA(1600x1200)</option>
-                  <option value="resolution2" className={styles.option}>SXGA(1280x1024)</option>
-                  <option value="resolution3" className={styles.option}>XGA(1024x768)</option>
-                  <option value="resolution4" className={styles.option}>SVGA(800x600)</option>
-                  <option value="resolution5" className={styles.option}>VGA(640x480)</option>
-                  <option value="resolution6" className={styles.option}>CIF(400x296)</option>
+                  <option value="1" className={styles.option}>UXGA(1600x1200)</option>
+                  <option value="2" className={styles.option}>SXGA(1280x1024)</option>
+                  <option value="3" className={styles.option}>XGA(1024x768)</option>
+                  <option value="4" className={styles.option}>SVGA(800x600)</option>
+                  <option value="5" className={styles.option}>VGA(640x480)</option>
+                  <option value="6" className={styles.option}>CIF(400x296)</option>
                 </select>
               </div>
 
@@ -230,6 +287,16 @@ export default function Home() {
                 />
               </div> 
 
+              <div className={styles.switchBox}>
+                <label>Posielať Email:</label>
+                <input
+                  type="checkbox"
+                  checked={sendEmail}
+                  onChange={(e) => setSendEmail(e.target.checked)}
+                  className={styles.switch}
+                />  
+              </div>
+
               <label>Dni pre upozornenia</label>
               <div className={styles.daysContainer}>
                 <label className={styles.dayCheckbox}>
@@ -289,8 +356,29 @@ export default function Home() {
                   <span>Ne</span>
                 </label>
               </div>
+
+
+              <div className={styles.switchBox}>
+                <label>Od:</label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className={styles.input}
+                />
+                <label>Do:</label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className={styles.input}
+                />
+              </div>
             </div>
           </div>
+            <button onClick={handleSendSettings} className={styles.saveButton}>
+                Uložiť nastavenia
+              </button>
         </div>
       </div>
     </main>
