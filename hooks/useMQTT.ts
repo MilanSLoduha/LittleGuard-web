@@ -64,7 +64,6 @@ export function useMQTT(): MQTTData {
       reconnectPeriod: 5000,
     }
 
-    console.log('Connecting to MQTT broker:', broker)
     if (!broker) {
       console.error('MQTT broker URL is not defined')
       return
@@ -73,7 +72,6 @@ export function useMQTT(): MQTTData {
     clientRef.current = client
 
     client.on('connect', () => {
-      console.log('MQTT Connected')
       setIsConnected(true)
 
       const tempTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPERATURE
@@ -109,23 +107,19 @@ export function useMQTT(): MQTTData {
       if (topic === tempTopic) {
         const temp = parseFloat(data)
         if (!isNaN(temp)) {
-          console.log('✅ Setting temperature:', temp)
           setTemperature(temp)
         }
       } 
       else if (topic === lastMotionTopic) {
-        console.log('✅ Setting lastMotion:', data)
         setLastMotion(data)
       }
       else if (topic === motionTopic) {
-        console.log('✅ Setting motion:', data === '1')
         setMotion(data === '1')
       }
       else if (topic === settingsTopic) {
         try {
           const parsedSettings = JSON.parse(data)
           setSettings(parsedSettings)
-          console.log('Settings updated:', parsedSettings)
         } catch (e) {
           console.error('Failed to parse settings:', e)
         }
