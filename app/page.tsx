@@ -10,7 +10,7 @@ import { useMQTT } from '@/hooks/useMQTT'
 export default function Home() {
   const router = useRouter()
 
-  const { temperature, motion, lastMotion, isConnected, settings, sendCommand } = useMQTT()
+  const { temperature, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT()
 
   const [selectedMode, setSelectedMode] = useState('mode1')
   const [selectedResolution, setSelectedResolution] = useState('1')
@@ -35,6 +35,8 @@ export default function Home() {
     saturday: false,
     sunday: false
   })
+
+  const [streamON, setStreamON] = useState<1 | 0>(1)
 
   useEffect(() => {
     if (settings) {
@@ -126,7 +128,7 @@ export default function Home() {
       </header>
       <div className={styles.grid}>
         {/* Camera Stream */}
-        <div className={styles.card + ' ' + styles.streamCard}>
+        <div className={styles.streamCard}>
           <iframe 
             width="100%" 
             height="600"
@@ -135,7 +137,16 @@ export default function Home() {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-          {/* Todo */}
+          <div className={styles.streamButtons}>
+            <button className={styles.menuButton} onClick={() => {
+              const newStream: 0 | 1 = streamON ? 0 : 1;
+              setStreamON(newStream);
+              streamControll(streamON)
+            }}>Spustiť stream</button>
+            <button className={styles.menuButton} onClick={() => {
+              saveSnapshot("snapshot");
+            }}>Uložiť snapshot</button>
+          </div>
         </div>
 
         <div className={styles.sidebar}>

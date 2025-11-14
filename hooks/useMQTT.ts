@@ -30,7 +30,9 @@ interface MQTTData {
   lastMotion: string | null
   isConnected: boolean
   settings: CameraSettings | null
-  sendCommand: (command: { type: string; [key: string]: any }) => void
+  sendCommand: (command: { type: string;[key: string]: any }) => void
+  streamControll: (number: 1 | 0) => void
+  saveSnapshot: (message: string) => void
 }
 
 export function useMQTT(): MQTTData {
@@ -47,6 +49,24 @@ export function useMQTT(): MQTTData {
       if (topic) {
         clientRef.current.publish(topic, JSON.stringify(command))
         console.log('Command sent:', command)
+      }
+    }
+  }, [isConnected])
+
+  const streamControll = useCallback((param: 1 | 0) => {
+    if (clientRef.current && isConnected) {
+      const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_STREAM_CONTROL;
+      if (topic) {
+        clientRef.current.publish(topic, param.toString())
+      }
+    }
+  }, [isConnected])
+
+   const saveSnapshot = useCallback((message: string) => {
+    if (clientRef.current && isConnected) {
+      const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_SNAPSHOT;
+      if (topic) {
+        clientRef.current.publish(topic, message.toString())
       }
     }
   }, [isConnected])
@@ -155,5 +175,7 @@ export function useMQTT(): MQTTData {
     isConnected,
     settings,
     sendCommand,
+    streamControll,
+    saveSnapshot
   }
 }

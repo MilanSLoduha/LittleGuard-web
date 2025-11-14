@@ -48,6 +48,7 @@
   grid-template-columns: 1fr 350px;
   gap: 1.5rem;
   grid-template-rows: auto auto;
+  height: 98vh;
 }
 
 .logoContainer {
@@ -67,6 +68,10 @@
 }
 
 .streamCard {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0.5rem;
   grid-row: span 2;
   height: fit-content;
 }
@@ -75,7 +80,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-height: 86.75vh;
+  height: 93vh;
+  max-height: 100vh;
   overflow-y: auto;
 }
 
@@ -213,4 +219,12 @@
 
 .saveButton:hover {
   background: var(--primary-hover);
+}
+
+.streamButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  gap: 10px;
+  padding-inline: 30%;
 }
