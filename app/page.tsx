@@ -3,10 +3,10 @@
 import Image from "next/image";
 import styles from './page.module.css'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useMQTT } from '@/hooks/useMQTT'
+import * as Ably from 'ably'
 
-  
 export default function Home() {
   const router = useRouter()
 
@@ -36,7 +36,43 @@ export default function Home() {
     sunday: false
   })
 
-  const [streamON, setStreamON] = useState<1 | 0>(1)
+  const [streamON, setStreamON] = useState<1 | 0>(0)
+  const ablyRef = useRef<Ably.Realtime | null>(null)
+  const [ablyConnected, setAblyConnected] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    const realtimeClient = new Ably.Realtime({ key: process.env.NEXT_PUBLIC_ABLY_KEY });
+
+    ablyRef.current = realtimeClient;
+    realtimeClient.connection.on('connected', () => {
+      setAblyConnected(true)
+    })
+
+    realtimeClient.connection.on('disconnected', () => {
+      setAblyConnected(false)
+    })
+
+    const channel = realtimeClient.channels.get('camera-stream');
+
+    channel.subscribe('frame', (message) => {
+      const data = message.data;
+
+      if (data && data.image) {
+        const ImageUrl = `data:image/jpeg;base64,${data.image}`;
+        if (imgRef.current) {
+          imgRef.current.src = ImageUrl;
+        }
+      } else {
+        console.log('No image in data:', data);
+      }
+    })
+
+    return () => {
+      channel.unsubscribe()
+      realtimeClient.close()
+    }
+  }, [])
 
   useEffect(() => {
     if (settings) {
@@ -53,7 +89,7 @@ export default function Home() {
       if (settings.aec !== undefined) setAec(settings.aec)
       if (settings.startTime) setStartTime(settings.startTime)
       if (settings.endTime) setEndTime(settings.endTime)
-      
+
       setNotificationDays({
         monday: settings.monday ?? false,
         tuesday: settings.tuesday ?? false,
@@ -118,8 +154,8 @@ export default function Home() {
           <h1>Little Guard</h1>
         </div>
         <div className={styles.status}>
-          <span className={isConnected ? styles.connected : styles.disconnected}> 
-            {isConnected ? 'Pripojené' : 'Odpojené'}
+          <span className={(isConnected && ablyConnected) ? styles.connected : styles.disconnected}>
+            {(isConnected && ablyConnected) ? 'Pripojené' : 'Odpojené'}
           </span>
           <button onClick={() => router.push('/menu')} className={styles.menuButton}>
             Menu
@@ -129,20 +165,18 @@ export default function Home() {
       <div className={styles.grid}>
         {/* Camera Stream */}
         <div className={styles.streamCard}>
-          <iframe 
-            width="100%" 
+
+          {streamON===0 && imgRef === null ? <div className={styles.streamOverlay}></div> : <img
+            ref={imgRef}
+            width="100%"
             height="600"
-            src="https://www.youtube.com/watch?v=glb33DUAfB4"
-            title="video test"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          />}
           <div className={styles.streamButtons}>
             <button className={styles.menuButton} onClick={() => {
-              const newStream: 0 | 1 = streamON ? 0 : 1;
+              const newStream: 0 | 1 = streamON===1 ? 0 : 1;
               setStreamON(newStream);
-              streamControll(streamON)
-            }}>Spustiť stream</button>
+              streamControll(newStream)
+            }}>{streamON ? <h1>||</h1> : <h1>&#9658;</h1>}</button>
             <button className={styles.menuButton} onClick={() => {
               saveSnapshot("snapshot");
             }}>Uložiť snapshot</button>
@@ -177,8 +211,8 @@ export default function Home() {
 
               <div className={styles.selectionBox}>
                 <label>Režim:</label>
-                <select 
-                  value={selectedMode} 
+                <select
+                  value={selectedMode}
                   onChange={(e) => setSelectedMode(e.target.value)}
                   className={styles.select}
                 >
@@ -190,8 +224,8 @@ export default function Home() {
 
               <div className={styles.selectionBox}>
                 <label>Rozlíšenie:</label>
-                <select 
-                  value={selectedResolution} 
+                <select
+                  value={selectedResolution}
                   onChange={(e) => setSelectedResolution(e.target.value)}
                   className={styles.select}
                 >
@@ -205,11 +239,11 @@ export default function Home() {
               </div>
 
               <label>Kvalita:</label>
-              <input 
+              <input
                 type="range"
                 min="10"
                 max="63"
-                value = {quality}
+                value={quality}
                 onChange={(e) => setQuality(Number(e.target.value))}
                 className={styles.slider}
               />
@@ -218,7 +252,7 @@ export default function Home() {
                 <label>Hotizontálne prevrátenie:</label>
                 <input
                   type="checkbox"
-                  checked= {horizontalFlip}
+                  checked={horizontalFlip}
                   onChange={(e) => setHorizontalFlip(Boolean(e.target.checked))}
                   className={styles.switch}
                 />
@@ -228,7 +262,7 @@ export default function Home() {
                 <label>Hardvérové znižovanie rozlíšenia:</label>
                 <input
                   type="checkbox"
-                  checked= {hwDownscale}
+                  checked={hwDownscale}
                   onChange={(e) => setHwDownscale(Boolean(e.target.checked))}
                   className={styles.switch}
                 />
@@ -238,7 +272,7 @@ export default function Home() {
                 <label>Softvérové ladenie bielej:</label>
                 <input
                   type="checkbox"
-                  checked= {awb}
+                  checked={awb}
                   onChange={(e) => setAwb(Boolean(e.target.checked))}
                   className={styles.switch}
                 />
@@ -248,28 +282,28 @@ export default function Home() {
                 <label>Softvérové ladenie expozície:</label>
                 <input
                   type="checkbox"
-                  checked= {aec}
+                  checked={aec}
                   onChange={(e) => setAec(Boolean(e.target.checked))}
                   className={styles.switch}
                 />
               </div>
 
               <label>Svetlosť:</label>
-              <input 
+              <input
                 type="range"
                 min="-2"
                 max="2"
-                value = {brightness}
+                value={brightness}
                 onChange={(e) => setBrightness(Number(e.target.value))}
                 className={styles.slider}
               />
 
               <label>Kontrast:</label>
-              <input 
+              <input
                 type="range"
                 min="-2"
                 max="2"
-                value = {contrast}
+                value={contrast}
                 onChange={(e) => setContrast(Number(e.target.value))}
                 className={styles.slider}
               />
@@ -285,7 +319,7 @@ export default function Home() {
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   placeholder="+421 XXX XXX XXX"
                   className={styles.input}
-                />                
+                />
               </div>
 
               <div className={styles.switchBox}>
@@ -296,7 +330,7 @@ export default function Home() {
                   onChange={(e) => setSendSMS(e.target.checked)}
                   className={styles.switch}
                 />
-              </div> 
+              </div>
 
               <div className={styles.switchBox}>
                 <label>Posielať Email:</label>
@@ -305,13 +339,13 @@ export default function Home() {
                   checked={sendEmail}
                   onChange={(e) => setSendEmail(e.target.checked)}
                   className={styles.switch}
-                />  
+                />
               </div>
 
               <label>Dni pre upozornenia</label>
               <div className={styles.daysContainer}>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.monday}
                     onChange={() => handleDayNotification('monday')}
@@ -319,7 +353,7 @@ export default function Home() {
                   <span>Po</span>
                 </label>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.tuesday}
                     onChange={() => handleDayNotification('tuesday')}
@@ -327,7 +361,7 @@ export default function Home() {
                   <span>Ut</span>
                 </label>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.wednesday}
                     onChange={() => handleDayNotification('wednesday')}
@@ -335,7 +369,7 @@ export default function Home() {
                   <span>St</span>
                 </label>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.thursday}
                     onChange={() => handleDayNotification('thursday')}
@@ -343,7 +377,7 @@ export default function Home() {
                   <span>Št</span>
                 </label>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.friday}
                     onChange={() => handleDayNotification('friday')}
@@ -351,7 +385,7 @@ export default function Home() {
                   <span>Pi</span>
                 </label>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.saturday}
                     onChange={() => handleDayNotification('saturday')}
@@ -359,7 +393,7 @@ export default function Home() {
                   <span>So</span>
                 </label>
                 <label className={styles.dayCheckbox}>
-                  <input 
+                  <input
                     type="checkbox"
                     checked={notificatinonDays.sunday}
                     onChange={() => handleDayNotification('sunday')}
@@ -387,9 +421,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-            <button onClick={handleSendSettings} className={styles.saveButton}>
-                Uložiť nastavenia
-              </button>
+          <button onClick={handleSendSettings} className={styles.saveButton}>
+            Uložiť nastavenia
+          </button>
         </div>
       </div>
     </main>
