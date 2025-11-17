@@ -165,8 +165,7 @@ export default function Home() {
       <div className={styles.grid}>
         {/* Camera Stream */}
         <div className={styles.streamCard}>
-
-          {streamON===0 && imgRef === null ? <div className={styles.streamOverlay}></div> : <img
+          {(streamON===0 && imgRef.current === null) ? <div className={styles.streamOverlay}></div> : <img
             ref={imgRef}
             width="100%"
             height="600"
