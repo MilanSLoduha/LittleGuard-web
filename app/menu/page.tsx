@@ -43,7 +43,7 @@ export default function menuPage() {
         console.log('Fetched cameras:', data.cameras)
         setCameras(data.cameras)
       } else {
-        console.error('Failed to fetch cameras:', response.status)
+        console.error('Failed to fetch cameras: ', response.status)
       }
     } catch (error) {
       console.error('Error fetching cameras:', error)
