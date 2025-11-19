@@ -12,9 +12,9 @@
 }
 
 .menuContainer {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    background: var(--background);
+  padding-left: 2rem;
+  padding-right: 2rem;
+  background: var(--background);
 }
 
 .main {
@@ -45,7 +45,7 @@
   align-items: center;
   margin-bottom: 2rem;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--card-border);   
+  border-bottom: 1px solid var(--card-border);
 }
 
 .logoContainer {
@@ -55,7 +55,7 @@
 }
 
 .logoutButton {
-  padding : 8px;
+  padding: 8px;
   background: var(--primary);
   color: white;
   border: none;
@@ -108,7 +108,7 @@
 }
 
 .codeButton {
-  padding : 8px;
+  padding: 8px;
   background: var(--primary);
   color: white;
   border: none;
@@ -117,6 +117,173 @@
   width: 12em;
 }
 
-.codeButton:hover {
+.codeButton:hover:not(:disabled) {
   background: var(--primary-hover);
+}
+
+.codeButton:disabled {
+  background: var(--card-border);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.mqttStatus {
+  color: #4caf50;
+  font-weight: 600;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.mqttStatusOffline {
+  color: #f44336;
+  font-weight: 600;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.successMessage {
+  color: #4caf50;
+  font-weight: 600;
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 6px;
+  border: 1px solid #4caf50;
+}
+
+.errorMessage {
+  color: #f44336;
+  font-weight: 600;
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 6px;
+  border: 1px solid #f44336;
+}
+
+.camerasList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.cameraCard {
+  background: var(--background);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: box-shadow 0.2s ease;
+}
+
+.cameraCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cameraInfo h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.macAddress {
+  color: var(--text-secondary);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.status {
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.online {
+  color: #4caf50;
+}
+
+.offline {
+  color: #f44336;
+}
+
+.lastSeen {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin: 4px 0 0 0;
+}
+
+.cameraActions {
+  display: flex;
+  gap: 12px;
+}
+
+.cameraButton {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.cameraButton:hover {
+  background: var(--primary-hover);
+}
+
+.nameEdit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nameInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.nameInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.saveButton {
+  padding: 6px 10px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.saveButton:hover {
+  background: #45a049;
+}
+
+.cancelButton {
+  padding: 6px 10px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #d32f2f;
 }

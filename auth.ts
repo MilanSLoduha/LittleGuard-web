@@ -60,6 +60,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}/menu`//po logine do menu
+
+      else if (new URL(url).origin === baseUrl) return url //ak nasa domena
+      return baseUrl
     }
   }
 })

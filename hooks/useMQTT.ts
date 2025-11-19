@@ -43,31 +43,37 @@ export function useMQTT(): MQTTData {
   const [settings, setSettings] = useState<CameraSettings | null>(null)
   const clientRef = useRef<MqttClient | null>(null)
 
-  const sendCommand = useCallback((command: { type: string; [key: string]: any }) => {
-    if (clientRef.current && isConnected) {
+  const sendCommand = useCallback((command: { type: string;[key: string]: any }) => {
+    if (clientRef.current && isConnected && clientRef.current.connected) {
       const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_COMMAND;
       if (topic) {
         clientRef.current.publish(topic, JSON.stringify(command))
         console.log('Command sent:', command)
       }
+    } else {
+      console.warn('MQTT client not connected, cannot send command')
     }
   }, [isConnected])
 
   const streamControll = useCallback((param: 1 | 0) => {
-    if (clientRef.current && isConnected) {
+    if (clientRef.current && isConnected && clientRef.current.connected) {
       const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_STREAM_CONTROL;
       if (topic) {
         clientRef.current.publish(topic, param.toString())
       }
+    } else {
+      console.warn('MQTT client not connected, cannot control stream')
     }
   }, [isConnected])
 
-   const saveSnapshot = useCallback((message: string) => {
-    if (clientRef.current && isConnected) {
+  const saveSnapshot = useCallback((message: string) => {
+    if (clientRef.current && isConnected && clientRef.current.connected) {
       const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_SNAPSHOT;
       if (topic) {
         clientRef.current.publish(topic, message.toString())
       }
+    } else {
+      console.warn('MQTT client not connected, cannot save snapshot')
     }
   }, [isConnected])
 
@@ -75,6 +81,11 @@ export function useMQTT(): MQTTData {
     const broker = process.env.NEXT_PUBLIC_MQTT_BROKER
     const username = process.env.NEXT_PUBLIC_MQTT_USERNAME
     const password = process.env.NEXT_PUBLIC_MQTT_PASSWORD
+
+    if (!broker || !username || !password) {
+      console.log('MQTT credentials not configured, skipping connection')
+      return
+    }
 
     const options: mqtt.IClientOptions = {
       protocol: 'wss',
@@ -91,7 +102,37 @@ export function useMQTT(): MQTTData {
     const client = mqtt.connect(broker, options)
     clientRef.current = client
 
+    const defaultSettingsTimeout = setTimeout(() => {
+      if (settings === null) {
+        const defaultSettings: CameraSettings = {
+          mode: "default",
+          resolution: "640x480",
+          quality: 80,
+          hFlip: false,
+          hwDownscale: false,
+          awb: true,
+          aec: true,
+          brightness: 50,
+          contrast: 50,
+          phoneNumber: "",
+          sendSMS: false,
+          monday: true,
+          tuesday: true,
+          wednesday: true,
+          thursday: true,
+          friday: true,
+          saturday: false,
+          sunday: false,
+          startTime: "08:00",
+          endTime: "18:00"
+        }
+        setSettings(defaultSettings)
+        console.log('Nastavené default nastavenia po 5 sekundách')
+      }
+    }, 5000)
+
     client.on('connect', () => {
+      console.log('MQTT connected successfully')
       setIsConnected(true)
 
       const tempTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPERATURE
@@ -104,13 +145,19 @@ export function useMQTT(): MQTTData {
         return
       }
 
-      client.subscribe([tempTopic, motionTopic, settingsTopic, lastMotionTopic], { qos: 1 }, (err) => {
-        if (err) {
-          console.error('Subscribe error:', err)
+      setTimeout(() => {
+        if (clientRef.current && client.connected) {
+          client.subscribe([tempTopic, motionTopic, settingsTopic, lastMotionTopic], { qos: 1 }, (err) => {
+            if (err) {
+              console.error('Subscribe error:', err)
+            } else {
+              console.log('Subscribed to topics:', [tempTopic, motionTopic, settingsTopic, lastMotionTopic])
+            }
+          })
         } else {
-          console.log('Subscribed to topics:', [tempTopic, motionTopic, settingsTopic, lastMotionTopic])
+          console.warn('MQTT client not connected, skipping subscription')
         }
-      })
+      }, 1000)
     })
 
     client.on('message', (topic, message) => {
@@ -129,7 +176,7 @@ export function useMQTT(): MQTTData {
         if (!isNaN(temp)) {
           setTemperature(temp)
         }
-      } 
+      }
       else if (topic === lastMotionTopic) {
         setLastMotion(data)
       }
@@ -138,33 +185,62 @@ export function useMQTT(): MQTTData {
       }
       else if (topic === settingsTopic) {
         try {
-          const parsedSettings = JSON.parse(data)
-          setSettings(parsedSettings)
+          if (typeof data === 'string' && data.length > 0) {
+            const trimmedData = data.trim()
+            if (trimmedData.length > 1 &&
+              ((trimmedData.startsWith('{') && trimmedData.endsWith('}')) ||
+                (trimmedData.startsWith('[') && trimmedData.endsWith(']')))) {
+              const parsedSettings = JSON.parse(trimmedData)
+              if (parsedSettings !== null && typeof parsedSettings === 'object' && !Array.isArray(parsedSettings)) {
+                setSettings(parsedSettings)
+                console.log('Successfuly parsed setings:', parsedSettings)
+              } else {
+                console.log('Parsed setings is not a valid object:', parsedSettings)
+              }
+            } else {
+              console.log('Received non-JSON formatted settings data:', trimmedData.substring(0, 50) + '...')
+            }
+          } else {
+            console.log('Received invalid settings data type or empty:', typeof data, data ? `"${data}"` : 'empty')
+          }
         } catch (e) {
-          console.error('Failed to parse settings:', e)
+          console.error('Failed to parse settings JSON:', e instanceof Error ? e.message : String(e), 'Raw data:', data ? `"${data}"` : 'empty')
         }
       }
     })
 
     client.on('error', (err) => {
-      console.error('MQTT error:', err)
+      console.error('MQTT connection error:', err)
       setIsConnected(false)
     })
 
     client.on('offline', () => {
-      console.log('MQTT offline')
+      console.log('MQTT client went offline')
+      setIsConnected(false)
+    })
+
+    client.on('close', () => {
+      console.log('MQTT connection closed')
       setIsConnected(false)
     })
 
     client.on('reconnect', () => {
-      console.log('MQTT reconnecting...')
+      console.log('MQTT attempting to reconnect...')
+    })
+
+    client.on('disconnect', (packet) => {
+      console.log('MQTT client disconnected:', packet)
+      setIsConnected(false)
     })
 
     return () => {
       if (clientRef.current) {
-        clientRef.current.end()
+        console.log('Cleaning up MQTT client')
+        clientRef.current.end(true) // Force disconnect
         clientRef.current = null
+        setIsConnected(false)
       }
+      clearTimeout(defaultSettingsTimeout)
     }
   }, [])
 

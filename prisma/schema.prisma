@@ -11,7 +11,30 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  cameras      Camera[]
+  pairingCodes PairingCode[]
+}
+
+model Camera {
+  id          String   @id @default(cuid())
+  name        String   @default("My Camera")
+  macAddress  String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOnline    Boolean  @default(false)
+  lastSeen    DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model PairingCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
