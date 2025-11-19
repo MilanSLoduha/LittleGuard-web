@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
 	req: NextRequest,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params
 		const session = await auth()
 		console.log('Session in PATCH:', session)
 
@@ -20,7 +21,7 @@ export async function PATCH(
 
 		const body = await req.json()
 		const { name } = body
-		console.log('Updating camera', params.id, 'to name:', name)
+		console.log('Updating camera', id, 'to name:', name)
 
 		if (!name || typeof name !== 'string' || name.trim().length === 0) {
 			return NextResponse.json(
@@ -32,7 +33,7 @@ export async function PATCH(
 		// Nájdi kameru a over či patrí používateľovi
 		const camera = await prisma.camera.findFirst({
 			where: {
-				id: params.id,
+				id: id,
 				user: {
 					email: session.user.email
 				}
@@ -49,7 +50,7 @@ export async function PATCH(
 
 		// Aktualizuj názov kamery
 		const updatedCamera = await prisma.camera.update({
-			where: { id: params.id },
+			where: { id: id },
 			data: { name: name.trim() }
 		})
 
