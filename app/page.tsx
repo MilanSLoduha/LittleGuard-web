@@ -18,7 +18,7 @@ export default function HomePage() {
     }
   }, [session, status, router])
 
-  // loading tabulecka
+  // loading tabulecka.
   return (
     <div style={{
       display: 'flex',
