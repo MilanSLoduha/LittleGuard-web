@@ -74,3 +74,52 @@ export async function PATCH(
 		)
 	}
 }
+
+export async function DELETE(
+	req: NextRequest,
+	{ params }: { params: Promise<{ id: string }> }
+) {
+	try {
+		const { id } = await params
+		const session = await auth()
+
+		if (!session || !session.user?.email) {
+			return NextResponse.json(
+				{ error: 'Unauthorized - Please log in' },
+				{ status: 401 }
+			)
+		}
+
+		const body = await req.json().catch(() => ({}))
+		if (!body?.confirm || body.confirm !== 'Odstran') {
+			return NextResponse.json(
+				{ error: 'Pre potvrdenie odpárovania je potrebné zadať text "Odstran"' },
+				{ status: 400 }
+			)
+		}
+
+		const camera = await prisma.camera.findFirst({
+			where: {
+				id,
+				user: { email: session.user.email }
+			}
+		})
+
+		if (!camera) {
+			return NextResponse.json(
+				{ error: 'Camera not found or access denied' },
+				{ status: 404 }
+			)
+		}
+
+		await prisma.camera.delete({ where: { id } })
+
+		return NextResponse.json({ success: true })
+	} catch (error) {
+		console.error('Error deleting camera:', error)
+		return NextResponse.json(
+			{ error: 'Internal server error' },
+			{ status: 500 }
+		)
+	}
+}

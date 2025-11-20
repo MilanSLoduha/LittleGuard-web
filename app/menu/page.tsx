@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import styles from './menu.module.css'
-import router from 'next/dist/shared/lib/router/router'
 import { signOut, useSession } from 'next-auth/react'
 import { useMQTT } from '@/hooks/useMQTT'
 
@@ -29,6 +28,8 @@ export default function menuPage() {
   const [loadingCameras, setLoadingCameras] = useState(true)
   const [editingCamera, setEditingCamera] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
+  const [unpairingCamera, setUnpairingCamera] = useState<string | null>(null)
+  const [unpairConfirm, setUnpairConfirm] = useState('')
 
   const handleLogout = async () => {
     await signOut({ redirect: false })
@@ -86,6 +87,44 @@ export default function menuPage() {
   const cancelEditing = () => {
     setEditingCamera(null)
     setEditingName('')
+  }
+
+  const startUnpairing = (cameraId: string) => {
+    setUnpairingCamera(cameraId)
+    setUnpairConfirm('')
+    setEditingCamera(null)
+  }
+
+  const cancelUnpairing = () => {
+    setUnpairingCamera(null)
+    setUnpairConfirm('')
+  }
+
+  const unpairCamera = async (cameraId: string) => {
+    if (unpairConfirm !== 'Odstran') {
+      alert('Pre potvrdenie napíš "Odstran"')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/cameras/${cameraId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirm: unpairConfirm })
+      })
+
+      if (response.ok) {
+        setUnpairingCamera(null)
+        setUnpairConfirm('')
+        fetchCameras()
+      } else {
+        const error = await response.json()
+        alert('Chyba pri odpárovaní: ' + (error.error || 'Neznáma chyba'))
+      }
+    } catch (error) {
+      console.error('Error unpairing camera:', error)
+      alert('Chyba pri odpárovaní kamery')
+    }
   }
 
   const goToStream = (cameraId: string) => {
@@ -270,33 +309,24 @@ export default function menuPage() {
                           onClick={() => saveCameraName(camera.id)}
                           className={styles.saveButton}
                         >
-                          ✓
+                          OK
                         </button>
                         <button
                           onClick={cancelEditing}
                           className={styles.cancelButton}
                         >
-                          ✕
+                          X
                         </button>
                       </div>
                     ) : (
                       <h3>{camera.name}</h3>
                     )}
-                    <p className={styles.macAddress}>MAC: {camera.macAddress}</p>
-                    <p className={styles.status}>
-                      <span className={camera.isOnline ? styles.online : styles.offline}>
-                        {camera.isOnline ? '● Online' : '● Offline'}
-                      </span>
-                    </p>
-                    <p className={styles.lastSeen}>
-                      Naposledy videné: {new Date(camera.lastSeen).toLocaleString('sk-SK')}
-                    </p>
                   </div>
                   <div className={styles.cameraActions}>
                     <button
                       className={styles.cameraButton}
                       onClick={() => startEditingName(camera.id, camera.name)}
-                      disabled={editingCamera !== null}
+                      disabled={editingCamera !== null || unpairingCamera !== null}
                     >
                       Zmeň názov
                     </button>
@@ -306,6 +336,39 @@ export default function menuPage() {
                     >
                       Stream
                     </button>
+                    {unpairingCamera === camera.id ? (
+                      <div className={styles.nameEdit}>
+                        <input
+                          type="text"
+                          value={unpairConfirm}
+                          onChange={(e) => setUnpairConfirm(e.target.value)}
+                          placeholder='Napíš "Odstran"'
+                          className={styles.nameInput}
+                          autoFocus
+                        />
+                        <button
+                          className={styles.saveButton}
+                          onClick={() => unpairCamera(camera.id)}
+                          disabled={unpairConfirm !== 'Odstran'}
+                        >
+                          Odpárovať
+                        </button>
+                        <button
+                          className={styles.cancelButton}
+                          onClick={cancelUnpairing}
+                        >
+                          X
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className={styles.cameraButton}
+                        onClick={() => startUnpairing(camera.id)}
+                        disabled={editingCamera !== null}
+                      >
+                        Odpárovať
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
