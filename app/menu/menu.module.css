@@ -185,34 +185,13 @@
 
 .cameraInfo h3 {
   margin: 0 0 8px 0;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
-}
-
-.macAddress {
-  color: var(--text-secondary);
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9rem;
-  margin: 4px 0;
 }
 
 .status {
   margin: 8px 0;
   font-weight: 500;
-}
-
-.online {
-  color: #4caf50;
-}
-
-.offline {
-  color: #f44336;
-}
-
-.lastSeen {
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-  margin: 4px 0 0 0;
 }
 
 .cameraActions {
@@ -221,14 +200,14 @@
 }
 
 .cameraButton {
-  padding: 8px 16px;
+  padding: 2px 4px;
   background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 400;
 }
 
 .cameraButton:hover {
@@ -266,7 +245,6 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s ease;
 }
 
 .saveButton:hover {
@@ -281,7 +259,6 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s ease;
 }
 
 .cancelButton:hover {
