@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
  * HTTP endpoint pre ESP kameru na odoslanie párovacieho kódu
  * Používa sa ako fallback, ak MQTT zlyhá
  */
+export const runtime = 'nodejs'
+
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json()

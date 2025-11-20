@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "app/api/**/route": {
+      "runtime": "nodejs20.x",
+      "includeFiles": "node_modules/.prisma/client/**"
+    }
+  }
+}
