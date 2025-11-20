@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
+interface Camera {
+  id: string
+  name: string
+  macAddress: string
+  isOnline: boolean
+  lastSeen: Date
+  createdAt: Date
+}
+
 export async function GET(req: NextRequest) {
 	try {
 		const session = await auth()
@@ -31,7 +40,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		return NextResponse.json({
-			cameras: user.cameras.map(camera => ({
+			cameras: user.cameras.map((camera: Camera) => ({
 				id: camera.id,
 				name: camera.name,
 				macAddress: camera.macAddress,
