@@ -2,11 +2,9 @@
   "version": 2,
   "functions": {
     "app/api/**/route.js": {
-      "runtime": "nodejs20.x",
       "includeFiles": "node_modules/.prisma/client/**"
     },
     "app/api/**/route.ts": {
-      "runtime": "nodejs20.x",
       "includeFiles": "node_modules/.prisma/client/**"
     }
   }
