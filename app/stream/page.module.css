@@ -84,6 +84,23 @@
   height: fit-content;
 }
 
+.streamWrapper {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.streamImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 12px;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -238,10 +255,13 @@
 }
 
 .streamOverlay {
-  width: 100%;
-  height: 600px;
-  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.55);
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .streamButtons h1 {

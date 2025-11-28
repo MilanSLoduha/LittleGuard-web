@@ -40,12 +40,13 @@ export default function StreamPage() {
 		sunday: false
 	})
 
-	const [streamON, setStreamON] = useState<1 | 0>(1)
+	const [streamON, setStreamON] = useState<1 | 0>(0)
 	const ablyRef = useRef<Ably.Realtime | null>(null)
 
 	const ablyOwnedRef = useRef<boolean>(false)
 	const [ablyConnected, setAblyConnected] = useState(false)
 	const imgRef = useRef<HTMLImageElement>(null)
+	const [hasFrame, setHasFrame] = useState(false)
 
 	//auth
 	useEffect(() => {
@@ -184,6 +185,7 @@ export default function StreamPage() {
 				if (imgRef.current) {
 					imgRef.current.src = ImageUrl;
 				}
+				if (!hasFrame) setHasFrame(true);
 			} else {
 				console.log('No image in data after parsing:', data);
 			}
@@ -329,13 +331,13 @@ export default function StreamPage() {
 			<div className={styles.grid}>
 				{/* Camera Stream */}
 				<div className={styles.streamCard}>
-					<img
-						ref={imgRef}
-						width="100%"
-						height="600"
-						className={styles.streamImg}
-					/>
-					{streamON === 0 && <div className={styles.streamOverlay}></div>}
+					<div className={styles.streamWrapper}>
+						<img
+							ref={imgRef}
+							className={styles.streamImg}
+						/>
+						{!hasFrame && <div className={styles.streamOverlay}></div>}
+					</div>
 					<div className={styles.streamButtons}>
 						<button className={styles.menuButton} onClick={() => {
 							const newStream: 0 | 1 = streamON === 1 ? 0 : 1;
