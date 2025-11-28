@@ -307,11 +307,13 @@ export default function StreamPage() {
 			<div className={styles.grid}>
 				{/* Camera Stream */}
 				<div className={styles.streamCard}>
-					{(streamON === 0 && imgRef.current === null) ? <div className={styles.streamOverlay}></div> : <img
+					<img
 						ref={imgRef}
 						width="100%"
 						height="600"
-					/>}
+						className={styles.streamImg}
+					/>
+					{streamON === 0 && <div className={styles.streamOverlay}></div>}
 					<div className={styles.streamButtons}>
 						<button className={styles.menuButton} onClick={() => {
 							const newStream: 0 | 1 = streamON === 1 ? 0 : 1;
