@@ -141,10 +141,24 @@ export default function StreamPage() {
 		const channel = realtimeClient.channels.get('camera-stream');
 
 		channel.subscribe('frame', (message) => {
-			const data = message.data;
+			const raw = message.data;
+			let data: any = raw;
+			if (typeof raw === 'string') {
+				try {
+					data = JSON.parse(raw);
+				} catch (err) {
+					console.warn('Ably frame payload is string and JSON.parse failed:', err, 'raw:', raw?.slice?.(0, 80));
+					data = null;
+				}
+			}
 
 			if (data && data.image) {
 				const ImageUrl = `data:image/jpeg;base64,${data.image}`;
+				if (imgRef.current) {
+					imgRef.current.src = ImageUrl;
+				}
+			} else if (data && data.data && data.data.image) {
+				const ImageUrl = `data:image/jpeg;base64,${data.data.image}`;
 				if (imgRef.current) {
 					imgRef.current.src = ImageUrl;
 				}
