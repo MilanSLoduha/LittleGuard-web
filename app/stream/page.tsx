@@ -40,7 +40,7 @@ export default function StreamPage() {
 		sunday: false
 	})
 
-	const [streamON, setStreamON] = useState<1 | 0>(0)
+	const [streamON, setStreamON] = useState<1 | 0>(1)
 	const ablyRef = useRef<Ably.Realtime | null>(null)
 
 	const ablyOwnedRef = useRef<boolean>(false)
@@ -143,27 +143,31 @@ export default function StreamPage() {
 		channel.subscribe('frame', (message) => {
 			const raw = message.data;
 			let data: any = raw;
+
 			if (typeof raw === 'string') {
+				console.log('Ably frame raw string len', raw.length);
 				try {
 					data = JSON.parse(raw);
 				} catch (err) {
-					console.warn('Ably frame payload is string and JSON.parse failed:', err, 'raw:', raw?.slice?.(0, 80));
+					console.warn('Ably frame payload is string and JSON.parse failed:', err, 'raw start:', raw?.slice?.(0, 120));
 					data = null;
 				}
+			} else {
+				console.log('Ably frame raw type', typeof raw, raw);
 			}
 
-			if (data && data.image) {
-				const ImageUrl = `data:image/jpeg;base64,${data.image}`;
-				if (imgRef.current) {
-					imgRef.current.src = ImageUrl;
-				}
-			} else if (data && data.data && data.data.image) {
-				const ImageUrl = `data:image/jpeg;base64,${data.data.image}`;
+			const imgBase64 =
+				(data && data.image) ? data.image :
+				(data && data.data && data.data.image) ? data.data.image :
+				null;
+
+			if (imgBase64) {
+				const ImageUrl = `data:image/jpeg;base64,${imgBase64}`;
 				if (imgRef.current) {
 					imgRef.current.src = ImageUrl;
 				}
 			} else {
-				console.log('No image in data:', data);
+				console.log('No image in data after parsing:', data);
 			}
 		})
 
