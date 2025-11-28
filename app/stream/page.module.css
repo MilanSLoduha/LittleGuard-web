@@ -87,16 +87,16 @@
 .streamWrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 600px;
   border-radius: 12px;
   overflow: hidden;
-  background: transparent;
+  background: #000;
 }
 
 .streamImg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   border-radius: 12px;
 }
