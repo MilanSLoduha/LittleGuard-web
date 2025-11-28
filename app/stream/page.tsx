@@ -235,6 +235,7 @@ export default function StreamPage() {
 			if (settings.contrast !== undefined) setContrast(settings.contrast)
 			if (settings.phoneNumber) setPhoneNumber(settings.phoneNumber)
 			if (settings.sendSMS !== undefined) setSendSMS(settings.sendSMS)
+			if (settings.sendEmail !== undefined) setSendEmail(settings.sendEmail)
 			if (settings.hFlip !== undefined) setHorizontalFlip(settings.hFlip)
 			if (settings.hwDownscale !== undefined) setHwDownscale(settings.hwDownscale)
 			if (settings.awb !== undefined) setAwb(settings.awb)
@@ -291,6 +292,7 @@ export default function StreamPage() {
 			aec: aec,
 			phoneNumber: phoneNumber,
 			sendSMS: sendSMS,
+			sendEmail: sendEmail,
 			monday: notificatinonDays.monday,
 			tuesday: notificatinonDays.tuesday,
 			wednesday: notificatinonDays.wednesday,

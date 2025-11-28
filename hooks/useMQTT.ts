@@ -13,6 +13,7 @@ interface CameraSettings {
   contrast?: number
   phoneNumber?: string
   sendSMS?: boolean
+  sendEmail?: boolean
   monday?: boolean
   tuesday?: boolean
   wednesday?: boolean
@@ -105,26 +106,27 @@ export function useMQTT(): MQTTData {
     const defaultSettingsTimeout = setTimeout(() => {
       if (settings === null) {
         const defaultSettings: CameraSettings = {
-          mode: "default",
-          resolution: "640x480",
-          quality: 80,
+          mode: "mode1",
+          resolution: "5",
+          quality: 12,
           hFlip: false,
           hwDownscale: false,
           awb: true,
           aec: true,
-          brightness: 50,
-          contrast: 50,
-          phoneNumber: "",
-          sendSMS: false,
-          monday: true,
-          tuesday: true,
-          wednesday: true,
-          thursday: true,
-          friday: true,
+          brightness: 0,
+          contrast: 0,
+        phoneNumber: "",
+        sendSMS: false,
+        sendEmail: false,
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: false,
           saturday: false,
           sunday: false,
-          startTime: "08:00",
-          endTime: "18:00"
+          startTime: "00:00",
+          endTime: "23:59"
         }
         setSettings(defaultSettings)
         console.log('Nastavené default nastavenia po 5 sekundách')
@@ -139,6 +141,7 @@ export function useMQTT(): MQTTData {
       const motionTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_MOTION
       const settingsTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_SETTINGS
       const lastMotionTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_LAST_MOTION
+      const commandTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_COMMAND
 
       if (!tempTopic || !motionTopic || !settingsTopic || !lastMotionTopic) {
         console.error('MQTT topics are not defined')
@@ -156,6 +159,16 @@ export function useMQTT(): MQTTData {
           })
         } else {
           console.warn('MQTT client not connected, skipping subscription')
+        }
+
+        if (commandTopic) {
+          setTimeout(() => {
+            if (clientRef.current && client.connected) {
+              const requestPayload = JSON.stringify({ type: 'get_settings' })
+              clientRef.current.publish(commandTopic, requestPayload)
+              console.log('Requested camera settings over MQTT')
+            }
+          }, 500)
         }
       }, 1000)
     })
