@@ -140,14 +140,32 @@ export default function StreamPage() {
 
 		const channel = realtimeClient.channels.get('camera-stream');
 
+		channel.subscribe((message) => {
+			const dt = message.data;
+			const typeInfo = dt instanceof ArrayBuffer
+				? 'ArrayBuffer'
+				: (ArrayBuffer.isView(dt) ? `TypedArray(${dt.constructor?.name})` : typeof dt);
+			console.log('Ably msg', message.name, 'data type:', typeInfo);
+		});
+
 		channel.subscribe('frame', (message) => {
 			const raw = message.data;
 			let data: any = raw;
 
-			if (typeof raw === 'string') {
-				console.log('Ably frame raw string len', raw.length);
+			if (raw instanceof ArrayBuffer || ArrayBuffer.isView(raw)) {
+				try {
+					const decoder = new TextDecoder();
+					const text = decoder.decode(raw as ArrayBuffer);
+					data = JSON.parse(text);
+					console.log('Ably frame decoded from binary, len', text.length);
+				} catch (err) {
+					console.warn('Failed to decode binary Ably frame', err);
+					data = null;
+				}
+			} else if (typeof raw === 'string') {
 				try {
 					data = JSON.parse(raw);
+					console.log('Ably frame raw string len', raw.length);
 				} catch (err) {
 					console.warn('Ably frame payload is string and JSON.parse failed:', err, 'raw start:', raw?.slice?.(0, 120));
 					data = null;
