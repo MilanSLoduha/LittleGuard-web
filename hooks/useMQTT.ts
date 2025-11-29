@@ -31,12 +31,14 @@ interface MQTTData {
   lastMotion: string | null
   isConnected: boolean
   settings: CameraSettings | null
-  sendCommand: (command: { type: string;[key: string]: any }) => void
+  sendCommand: (command: { type: string; [key: string]: any }) => void
   streamControll: (number: 1 | 0) => void
   saveSnapshot: (message: string) => void
 }
 
-export function useMQTT(): MQTTData {
+const normalizeMac = (mac?: string | null) => (mac ? mac.replace(/[^a-fA-F0-9]/g, '').toLowerCase() : '')
+
+export function useMQTT(macAddress?: string): MQTTData {
   const [temperature, setTemperature] = useState<number | null>(null)
   const [motion, setMotion] = useState(false)
   const [lastMotion, setLastMotion] = useState<string | null>(null)
@@ -45,39 +47,53 @@ export function useMQTT(): MQTTData {
   const clientRef = useRef<MqttClient | null>(null)
   const defaultSettingsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const sendCommand = useCallback((command: { type: string;[key: string]: any }) => {
-    if (clientRef.current && isConnected && clientRef.current.connected) {
-      const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_COMMAND;
-      if (topic) {
-        clientRef.current.publish(topic, JSON.stringify(command))
+  const topicRoot = process.env.NEXT_PUBLIC_MQTT_TOPIC_ROOT || 'littleguard'
+  const macNormalized = normalizeMac(macAddress)
+  const topicPrefix = `${topicRoot}/${macNormalized || '+'}`
+  const topics = {
+    temperature: `${topicPrefix}/temperature`,
+    motion: `${topicPrefix}/motion`,
+    lastMotion: `${topicPrefix}/last_motion`,
+    settings: `${topicPrefix}/settings`,
+    command: `${topicPrefix}/command`,
+    stream: `${topicPrefix}/stream_control`,
+    snapshot: `${topicPrefix}/snapshot`,
+  }
+  const canPublish = macNormalized.length > 0
+
+  const sendCommand = useCallback(
+    (command: { type: string; [key: string]: any }) => {
+      if (clientRef.current && isConnected && clientRef.current.connected && topics?.command && canPublish) {
+        clientRef.current.publish(topics.command, JSON.stringify(command))
         console.log('Command sent:', command)
+      } else {
+        console.warn('MQTT client not connected, cannot send command')
       }
-    } else {
-      console.warn('MQTT client not connected, cannot send command')
-    }
-  }, [isConnected])
+    },
+    [isConnected, topics?.command, canPublish]
+  )
 
-  const streamControll = useCallback((param: 1 | 0) => {
-    if (clientRef.current && isConnected && clientRef.current.connected) {
-      const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_STREAM_CONTROL;
-      if (topic) {
-        clientRef.current.publish(topic, param.toString())
+  const streamControll = useCallback(
+    (param: 1 | 0) => {
+      if (clientRef.current && isConnected && clientRef.current.connected && topics?.stream && canPublish) {
+        clientRef.current.publish(topics.stream, param.toString())
+      } else {
+        console.warn('MQTT client not connected, cannot control stream')
       }
-    } else {
-      console.warn('MQTT client not connected, cannot control stream')
-    }
-  }, [isConnected])
+    },
+    [isConnected, topics?.stream, canPublish]
+  )
 
-  const saveSnapshot = useCallback((message: string) => {
-    if (clientRef.current && isConnected && clientRef.current.connected) {
-      const topic = process.env.NEXT_PUBLIC_MQTT_TOPIC_SNAPSHOT;
-      if (topic) {
-        clientRef.current.publish(topic, message.toString())
+  const saveSnapshot = useCallback(
+    (message: string) => {
+      if (clientRef.current && isConnected && clientRef.current.connected && topics?.snapshot && canPublish) {
+        clientRef.current.publish(topics.snapshot, message.toString())
+      } else {
+        console.warn('MQTT client not connected, cannot save snapshot')
       }
-    } else {
-      console.warn('MQTT client not connected, cannot save snapshot')
-    }
-  }, [isConnected])
+    },
+    [isConnected, topics?.snapshot, canPublish]
+  )
 
   useEffect(() => {
     const broker = process.env.NEXT_PUBLIC_MQTT_BROKER
@@ -85,7 +101,7 @@ export function useMQTT(): MQTTData {
     const password = process.env.NEXT_PUBLIC_MQTT_PASSWORD
 
     if (!broker || !username || !password) {
-      console.log('MQTT credentials not configured, skipping connection')
+      console.log('MQTT credentials not configured or topics not ready, skipping connection')
       return
     }
 
@@ -97,18 +113,20 @@ export function useMQTT(): MQTTData {
       reconnectPeriod: 5000,
     }
 
-    if (!broker) {
-      console.error('MQTT broker URL is not defined')
-      return
-    }
     const client = mqtt.connect(broker, options)
     clientRef.current = client
+
+    setTemperature(null)
+    setMotion(false)
+    setLastMotion(null)
+    setSettings(null)
+    setIsConnected(false)
 
     defaultSettingsTimeoutRef.current = setTimeout(() => {
       if (settings === null) {
         const defaultSettings: CameraSettings = {
-          mode: "mode1",
-          resolution: "5",
+          mode: 'mode1',
+          resolution: '5',
           quality: 12,
           hFlip: false,
           hwDownscale: false,
@@ -116,9 +134,9 @@ export function useMQTT(): MQTTData {
           aec: true,
           brightness: 0,
           contrast: 0,
-        phoneNumber: "",
-        sendSMS: false,
-        sendEmail: false,
+          phoneNumber: '',
+          sendSMS: false,
+          sendEmail: false,
           monday: false,
           tuesday: false,
           wednesday: false,
@@ -126,8 +144,8 @@ export function useMQTT(): MQTTData {
           friday: false,
           saturday: false,
           sunday: false,
-          startTime: "00:00",
-          endTime: "23:59"
+          startTime: '00:00',
+          endTime: '23:59',
         }
         setSettings(defaultSettings)
         console.log('Nastavenie default nastavenia po 10 sekundach - ziadne MQTT setings neprisli')
@@ -138,13 +156,13 @@ export function useMQTT(): MQTTData {
       console.log('MQTT connected successfully')
       setIsConnected(true)
 
-      const tempTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPERATURE
-      const motionTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_MOTION
-      const settingsTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_SETTINGS
-      const lastMotionTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_LAST_MOTION
-      const commandTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_COMMAND
+      const tempTopic = topics?.temperature
+      const motionTopic = topics?.motion
+      const settingsTopic = topics?.settings
+      const lastMotionTopic = topics?.lastMotion
+      const commandTopic = topics?.command
 
-      if (!tempTopic || !motionTopic || !settingsTopic || !lastMotionTopic) {
+      if (!tempTopic || !motionTopic || !settingsTopic || !lastMotionTopic || !commandTopic) {
         console.error('MQTT topics are not defined')
         return
       }
@@ -162,15 +180,13 @@ export function useMQTT(): MQTTData {
           console.warn('MQTT client not connected, skipping subscription')
         }
 
-        if (commandTopic) {
-          setTimeout(() => {
-            if (clientRef.current && client.connected) {
-              const requestPayload = JSON.stringify({ type: 'get_settings' })
-              clientRef.current.publish(commandTopic, requestPayload)
-              console.log('Requested camera settings over MQTT')
-            }
-          }, 500)
-        }
+        setTimeout(() => {
+          if (clientRef.current && client.connected && commandTopic) {
+            const requestPayload = JSON.stringify({ type: 'get_settings' })
+            clientRef.current.publish(commandTopic, requestPayload)
+            console.log('Requested camera settings over MQTT')
+          }
+        }, 500)
       }, 1000)
     })
 
@@ -178,10 +194,10 @@ export function useMQTT(): MQTTData {
       const data = message.toString()
       console.log('MQTT message:', topic, data)
 
-      const tempTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_TEMPERATURE
-      const motionTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_MOTION
-      const lastMotionTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_LAST_MOTION
-      const settingsTopic = process.env.NEXT_PUBLIC_MQTT_TOPIC_SETTINGS
+      const tempTopic = topics?.temperature
+      const motionTopic = topics?.motion
+      const lastMotionTopic = topics?.lastMotion
+      const settingsTopic = topics?.settings
 
       console.log('🔍 Comparing:', { topic, tempTopic, motionTopic, lastMotionTopic, settingsTopic })
 
@@ -190,20 +206,19 @@ export function useMQTT(): MQTTData {
         if (!isNaN(temp)) {
           setTemperature(temp)
         }
-      }
-      else if (topic === lastMotionTopic) {
+      } else if (topic === lastMotionTopic) {
         setLastMotion(data)
-      }
-      else if (topic === motionTopic) {
+      } else if (topic === motionTopic) {
         setMotion(data === '1')
-      }
-      else if (topic === settingsTopic) {
+      } else if (topic === settingsTopic) {
         try {
           if (typeof data === 'string' && data.length > 0) {
             const trimmedData = data.trim()
-            if (trimmedData.length > 1 &&
+            if (
+              trimmedData.length > 1 &&
               ((trimmedData.startsWith('{') && trimmedData.endsWith('}')) ||
-                (trimmedData.startsWith('[') && trimmedData.endsWith(']')))) {
+                (trimmedData.startsWith('[') && trimmedData.endsWith(']')))
+            ) {
               const parsedSettings = JSON.parse(trimmedData)
               if (parsedSettings !== null && typeof parsedSettings === 'object' && !Array.isArray(parsedSettings)) {
                 setSettings(parsedSettings)
@@ -263,7 +278,7 @@ export function useMQTT(): MQTTData {
         defaultSettingsTimeoutRef.current = null
       }
     }
-  }, [])
+  }, [topicPrefix, macNormalized])
 
   return {
     temperature,
@@ -273,6 +288,6 @@ export function useMQTT(): MQTTData {
     settings,
     sendCommand,
     streamControll,
-    saveSnapshot
+    saveSnapshot,
   }
 }

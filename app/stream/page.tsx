@@ -12,9 +12,7 @@ export default function StreamPage() {
 	const router = useRouter()
 	const { data: session, status } = useSession()
 
-	const { temperature, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT()
-
-	const [selectedCamera, setSelectedCamera] = useState<{ id: string, name: string } | null>(null)
+	const [selectedCamera, setSelectedCamera] = useState<{ id: string, name: string, macAddress: string } | null>(null)
 
 	const [selectedMode, setSelectedMode] = useState('mode1')
 	const [selectedResolution, setSelectedResolution] = useState('1')
@@ -42,11 +40,17 @@ export default function StreamPage() {
 
 	const [streamON, setStreamON] = useState<1 | 0>(0)
 	const ablyRef = useRef<Ably.Realtime | null>(null)
+	const ablyChannelRef = useRef<string | null>(null)
 
 	const ablyOwnedRef = useRef<boolean>(false)
 	const [ablyConnected, setAblyConnected] = useState(false)
 	const imgRef = useRef<HTMLImageElement>(null)
 	const [hasFrame, setHasFrame] = useState(false)
+
+	const cameraMac = selectedCamera?.macAddress
+	const normalizedMac = cameraMac ? cameraMac.replace(/[^a-fA-F0-9]/g, '').toLowerCase() : ''
+	const ablyChannelName = normalizedMac ? `camera-stream-${normalizedMac}` : null
+	const { temperature, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT(cameraMac)
 
 	//auth
 	useEffect(() => {
@@ -88,7 +92,7 @@ export default function StreamPage() {
 				})
 				.then(data => {
 					if (data && data.camera) {
-						setSelectedCamera({ id: cameraId, name: data.camera.name })
+						setSelectedCamera({ id: cameraId, name: data.camera.name, macAddress: data.camera.macAddress })
 					}
 				})
 				.catch(err => console.error('Error fetching camera:', err))
@@ -97,7 +101,7 @@ export default function StreamPage() {
 
 	// Ably
 	useEffect(() => {
-		if (status !== 'authenticated') {
+		if (status !== 'authenticated' || !ablyChannelName) {
 			return
 		}
 
@@ -139,7 +143,8 @@ export default function StreamPage() {
 			setAblyConnected(false)
 		})
 
-		const channel = realtimeClient.channels.get('camera-stream');
+		const channel = realtimeClient.channels.get(ablyChannelName);
+		ablyChannelRef.current = ablyChannelName;
 
 		channel.subscribe((message) => {
 			const dt = message.data;
@@ -197,18 +202,19 @@ export default function StreamPage() {
 				if (channel) {
 					channel.unsubscribe()
 				}
-				if (ablyOwnedRef.current && ablyRef.current) {
+				if (ablyRef.current) {
 					ablyRef.current.close()
 				}
 			} catch (err) {
 				console.warn('Error during Ably cleanup:', err)
 			} finally {
 				ablyRef.current = null
+				ablyChannelRef.current = null
 				ablyOwnedRef.current = false
 				setAblyConnected(false)
 			}
 		}
-	}, [status])
+	}, [status, ablyChannelName])
 
 	// Cleanup
 	useEffect(() => {
@@ -217,10 +223,10 @@ export default function StreamPage() {
 			try {
 				if (ablyRef.current) {
 					const client = ablyRef.current
-					const channel = client.channels.get('camera-stream')
-					if (channel) {
-						channel.unsubscribe()
-					}
+					const channelName = ablyChannelRef.current || (ablyChannelName ?? 'camera-stream')
+					const channel = client.channels.get(channelName)
+					channel.unsubscribe()
+					client.close()
 				}
 			} catch (err) {
 				console.warn('Error during component cleanup:', err)
