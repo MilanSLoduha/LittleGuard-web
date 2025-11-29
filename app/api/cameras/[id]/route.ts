@@ -75,6 +75,51 @@ export async function PATCH(
 	}
 }
 
+export async function GET(
+	req: NextRequest,
+	{ params }: { params: Promise<{ id: string }> }
+) {
+	try {
+		const { id } = await params;
+		const session = await auth();
+
+		if (!session || !session.user?.email) {
+			return NextResponse.json(
+				{ error: 'Unauthorized - Please log in' },
+				{ status: 401 }
+			);
+		}
+
+		const camera = await prisma.camera.findFirst({
+			where: {
+				id,
+				user: { email: session.user.email },
+			},
+		});
+
+		if (!camera) {
+			return NextResponse.json(
+				{ error: 'Camera not found or access denied' },
+				{ status: 404 }
+			);
+		}
+
+		return NextResponse.json({
+			camera: {
+				id: camera.id,
+				name: camera.name,
+				macAddress: camera.macAddress,
+			},
+		});
+	} catch (error) {
+		console.error('Error fetching camera by id:', error);
+		return NextResponse.json(
+			{ error: 'Internal server error' },
+			{ status: 500 }
+		);
+	}
+}
+
 export async function DELETE(
 	req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> }
