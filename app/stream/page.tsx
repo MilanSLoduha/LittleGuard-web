@@ -97,7 +97,7 @@ export default function StreamPage() {
 
 	// Ably
 	useEffect(() => {
-		if (status === 'loading' || !session) {
+		if (status !== 'authenticated') {
 			return
 		}
 
@@ -192,16 +192,23 @@ export default function StreamPage() {
 		})
 
 		return () => {
-			console.log('Cleaning up Ably client instance - unsubscribing only')
+			console.log('Cleaning up Ably client instance - closing connection')
 			try {
 				if (channel) {
 					channel.unsubscribe()
 				}
+				if (ablyOwnedRef.current && ablyRef.current) {
+					ablyRef.current.close()
+				}
 			} catch (err) {
 				console.warn('Error during Ably cleanup:', err)
+			} finally {
+				ablyRef.current = null
+				ablyOwnedRef.current = false
+				setAblyConnected(false)
 			}
 		}
-	}, [status, session])
+	}, [status])
 
 	// Cleanup
 	useEffect(() => {
