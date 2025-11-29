@@ -180,13 +180,17 @@ export function useMQTT(macAddress?: string): MQTTData {
           console.warn('MQTT client not connected, skipping subscription')
         }
 
-        setTimeout(() => {
-          if (clientRef.current && client.connected && commandTopic) {
-            const requestPayload = JSON.stringify({ type: 'get_settings' })
-            clientRef.current.publish(commandTopic, requestPayload)
-            console.log('Requested camera settings over MQTT')
-          }
-        }, 500)
+        if (canPublish) {
+          setTimeout(() => {
+            if (clientRef.current && client.connected && commandTopic) {
+              const requestPayload = JSON.stringify({ type: 'get_settings' })
+              clientRef.current.publish(commandTopic, requestPayload)
+              console.log('Requested camera settings over MQTT')
+            }
+          }, 500)
+        } else {
+          console.log('Skipping get_settings publish because MAC is unknown (wildcard subscribe only)')
+        }
       }, 1000)
     })
 
