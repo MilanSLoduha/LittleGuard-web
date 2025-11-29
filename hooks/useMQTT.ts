@@ -43,6 +43,7 @@ export function useMQTT(): MQTTData {
   const [isConnected, setIsConnected] = useState(false)
   const [settings, setSettings] = useState<CameraSettings | null>(null)
   const clientRef = useRef<MqttClient | null>(null)
+  const defaultSettingsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const sendCommand = useCallback((command: { type: string;[key: string]: any }) => {
     if (clientRef.current && isConnected && clientRef.current.connected) {
@@ -103,7 +104,7 @@ export function useMQTT(): MQTTData {
     const client = mqtt.connect(broker, options)
     clientRef.current = client
 
-    const defaultSettingsTimeout = setTimeout(() => {
+    defaultSettingsTimeoutRef.current = setTimeout(() => {
       if (settings === null) {
         const defaultSettings: CameraSettings = {
           mode: "mode1",
@@ -129,9 +130,9 @@ export function useMQTT(): MQTTData {
           endTime: "23:59"
         }
         setSettings(defaultSettings)
-        console.log('Nastavené default nastavenia po 5 sekundách')
+        console.log('Nastavenie default nastavenia po 10 sekundach - ziadne MQTT setings neprisli')
       }
-    }, 5000)
+    }, 10000)
 
     client.on('connect', () => {
       console.log('MQTT connected successfully')
@@ -207,6 +208,10 @@ export function useMQTT(): MQTTData {
               if (parsedSettings !== null && typeof parsedSettings === 'object' && !Array.isArray(parsedSettings)) {
                 setSettings(parsedSettings)
                 console.log('Successfuly parsed setings:', parsedSettings)
+                if (defaultSettingsTimeoutRef.current) {
+                  clearTimeout(defaultSettingsTimeoutRef.current)
+                  defaultSettingsTimeoutRef.current = null
+                }
               } else {
                 console.log('Parsed setings is not a valid object:', parsedSettings)
               }
@@ -253,7 +258,10 @@ export function useMQTT(): MQTTData {
         clientRef.current = null
         setIsConnected(false)
       }
-      clearTimeout(defaultSettingsTimeout)
+      if (defaultSettingsTimeoutRef.current) {
+        clearTimeout(defaultSettingsTimeoutRef.current)
+        defaultSettingsTimeoutRef.current = null
+      }
     }
   }, [])
 
