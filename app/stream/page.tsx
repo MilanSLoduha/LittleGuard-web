@@ -401,27 +401,6 @@ export default function StreamPage() {
 
 					<div className={styles.card}>
 						<div className={styles.block}>
-							<h2>Zdie?a? kameru</h2>
-							{shareError && <p className={styles.errorText}>{shareError}</p>}
-							{shareCode && (
-								<div className={styles.shareCodeBox}>
-									<span className={styles.shareCode}>{shareCode}</span>
-									{shareExpiry && (
-										<small className={styles.shareExpiry}>
-											Platn? do {new Date(shareExpiry).toLocaleString()}
-										</small>
-									)}
-								</div>
-							)}
-							<button
-								className={styles.menuButton}
-								onClick={handleGenerateShareCode}
-								disabled={!selectedCamera || shareLoading}
-							>
-								{shareLoading ? 'Generujem...' : 'Vygenerova? k?d'}
-							</button>
-						</div>
-						<div className={styles.block}>
 							<h2>Údaje</h2>
 
 							<div className={styles.infoBox}>
@@ -654,6 +633,27 @@ export default function StreamPage() {
 									className={styles.input}
 								/>
 							</div>
+						</div>
+						<div className={styles.block}>
+							<h2>Zdieľanie kamery</h2>
+							{shareError && <p className={styles.errorText}>{shareError}</p>}
+							{shareCode && (
+								<div className={styles.shareCodeBox}>
+									<span className={styles.shareCode}>{shareCode}</span>
+									{shareExpiry && (
+										<small className={styles.shareExpiry}>
+											Platn? do {new Date(shareExpiry).toLocaleString()}
+										</small>
+									)}
+								</div>
+							)}
+							<button
+								className={styles.menuButton}
+								onClick={handleGenerateShareCode}
+								disabled={!selectedCamera || shareLoading}
+							>
+								{shareLoading ? 'Generujem...' : 'Vygenerovať kód'}
+							</button>
 						</div>
 					</div>
 					<button onClick={handleSendSettings} className={styles.saveButton}>
