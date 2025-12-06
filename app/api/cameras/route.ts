@@ -46,7 +46,9 @@ export async function GET(req: NextRequest) {
 		}
 
 		const ownedCameras = user.cameras ?? []
-		const sharedCameras = (user.cameraAccesses ?? []).map(access => access.camera)
+		const sharedCameras = (user.cameraAccesses ?? [])
+			.map((access: { camera: Camera | null }) => access.camera)
+			.filter((camera): camera is Camera => Boolean(camera))
 		const uniqueCamerasMap = new Map<string, Camera>()
 
 		;[...ownedCameras, ...sharedCameras].forEach((camera: any) => {
