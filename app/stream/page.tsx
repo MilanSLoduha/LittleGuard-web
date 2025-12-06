@@ -640,19 +640,14 @@ export default function StreamPage() {
 							{shareCode && (
 								<div className={styles.shareCodeBox}>
 									<span className={styles.shareCode}>{shareCode}</span>
-									{shareExpiry && (
-										<small className={styles.shareExpiry}>
-											Platn? do {new Date(shareExpiry).toLocaleString()}
-										</small>
-									)}
 								</div>
 							)}
 							<button
-								className={styles.menuButton}
+								className={styles.generateButton}
 								onClick={handleGenerateShareCode}
 								disabled={!selectedCamera || shareLoading}
 							>
-								{shareLoading ? 'Generujem...' : 'Vygenerovať kód'}
+								{shareLoading ? 'Generujem...' : 'Kód'}
 							</button>
 						</div>
 					</div>

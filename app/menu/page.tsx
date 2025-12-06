@@ -18,7 +18,7 @@ interface Camera {
 
 export default function menuPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { settings, isConnected } = useMQTT()
   const [random, setRandom] = useState('------')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -38,6 +38,23 @@ export default function menuPage() {
   const handleLogout = async () => {
     await signOut({ redirect: false })
     router.push('/login')
+  }
+
+  useEffect(() => {
+    if (status === 'loading') return
+    if (!session) {
+      router.push('/login')
+    }
+  }, [session, status, router])
+
+  if (status === 'loading') {
+    return (
+      <main className={styles.main}>
+        <div className={styles.loading}>
+          <p>Načítavam...</p>
+        </div>
+      </main>
+    )
   }
 
   const fetchCameras = async () => {
