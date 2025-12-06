@@ -258,6 +258,33 @@
   justify-content: center;
 }
 
+.shareCodeBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: 1px dashed var(--card-border);
+  border-radius: 8px;
+  background: var(--card-border);
+  color: var(--foreground);
+  margin-bottom: 10px;
+}
+
+.shareCode {
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 1.1rem;
+}
+
+.shareExpiry {
+  color: var(--text-secondary);
+}
+
+.errorText {
+  color: #f44336;
+  margin: 6px 0;
+}
+
 .streamButtons h1 {
   align-self: center;
   justify-self: center;

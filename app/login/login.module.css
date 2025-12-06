@@ -5,6 +5,7 @@
   justify-content: center;
   background: var(--background);
   padding: 20px;
+  height: 100%;
 }
 
 .authCard {
@@ -38,7 +39,6 @@
   flex-direction: column;
   gap: 32px;
   border: 1px solid var(--card-border);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .formGroup {

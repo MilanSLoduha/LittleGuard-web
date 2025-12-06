@@ -30,6 +30,10 @@ export default function menuPage() {
   const [editingName, setEditingName] = useState('')
   const [unpairingCamera, setUnpairingCamera] = useState<string | null>(null)
   const [unpairConfirm, setUnpairConfirm] = useState('')
+  const [shareCode, setShareCode] = useState('')
+  const [shareStatus, setShareStatus] = useState<string | null>(null)
+  const [shareError, setShareError] = useState<string | null>(null)
+  const [shareLoading, setShareLoading] = useState(false)
 
   const handleLogout = async () => {
     await signOut({ redirect: false })
@@ -98,6 +102,38 @@ export default function menuPage() {
   const cancelUnpairing = () => {
     setUnpairingCamera(null)
     setUnpairConfirm('')
+  }
+
+  const redeemShareCode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!shareCode.trim()) return
+    setShareLoading(true)
+    setShareStatus(null)
+    setShareError(null)
+
+    try {
+      const response = await fetch('/api/cameras/share/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: shareCode.trim() })
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        setShareError(data?.error || 'Nepodarilo sa pridať kameru')
+        return
+      }
+
+      setShareStatus(`Kamera pridaná: ${data?.camera?.name || ''}`)
+      setShareCode('')
+      fetchCameras()
+    } catch (error) {
+      console.error('Error redeeming share code:', error)
+      setShareError('Chyba pri spracovaní kódu')
+    } finally {
+      setShareLoading(false)
+    }
   }
 
   const unpairCamera = async (cameraId: string) => {
@@ -374,6 +410,30 @@ export default function menuPage() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className={styles.shareSection}>
+          <h2>Pridať už spárovanú kameru</h2>
+          <p className={styles.instructions}>
+            Pre pridanie kamery iného používateľa zadajte párovací kód zo stránky kamery.
+          </p>
+          {shareStatus && <p className={styles.successMessage}>{shareStatus}</p>}
+          {shareError && <p className={styles.errorMessage}>{shareError}</p>}
+          <form className={styles.shareForm} onSubmit={redeemShareCode}>
+            <input
+              type="text"
+              value={shareCode}
+              onChange={(e) => setShareCode(e.target.value)}
+              className={styles.shareInput}
+            />
+            <button
+              type="submit"
+              className={styles.shareButton}
+              disabled={shareLoading || !shareCode.trim()}
+            >
+              {shareLoading ? 'Pridávam...' : 'Pridať kameru'}
+            </button>
+          </form>
         </section>
       </main>
     </div>

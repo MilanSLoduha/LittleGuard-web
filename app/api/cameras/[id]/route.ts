@@ -90,10 +90,25 @@ export async function GET(
 			);
 		}
 
+		const user = await prisma.user.findUnique({
+			where: { email: session.user.email },
+			select: { id: true }
+		})
+
+		if (!user) {
+			return NextResponse.json(
+				{ error: 'User not found' },
+				{ status: 404 }
+			)
+		}
+
 		const camera = await prisma.camera.findFirst({
 			where: {
 				id,
-				user: { email: session.user.email },
+				OR: [
+					{ userId: user.id },
+					{ accesses: { some: { userId: user.id } } }
+				],
 			},
 		});
 

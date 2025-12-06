@@ -30,6 +30,10 @@ export async function GET(req: NextRequest) {
 			include: {
 				cameras: {
 					orderBy: { createdAt: 'desc' }
+				},
+				cameraAccesses: {
+					orderBy: { createdAt: 'desc' },
+					include: { camera: true }
 				}
 			}
 		})
@@ -41,8 +45,20 @@ export async function GET(req: NextRequest) {
 			)
 		}
 
+		const ownedCameras = user.cameras ?? []
+		const sharedCameras = (user.cameraAccesses ?? []).map(access => access.camera)
+		const uniqueCamerasMap = new Map<string, Camera>()
+
+		;[...ownedCameras, ...sharedCameras].forEach((camera: any) => {
+			if (camera && !uniqueCamerasMap.has(camera.id)) {
+				uniqueCamerasMap.set(camera.id, camera)
+			}
+		})
+
+		const cameras = Array.from(uniqueCamerasMap.values())
+
 		return NextResponse.json({
-			cameras: user.cameras.map((camera: Camera) => ({
+			cameras: cameras.map((camera: Camera) => ({
 				id: camera.id,
 				name: camera.name,
 				macAddress: camera.macAddress,

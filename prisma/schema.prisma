@@ -18,6 +18,9 @@ model User {
   password     String
   cameras      Camera[]
   pairingCodes PairingCode[]
+  cameraAccesses   CameraAccess[]
+  shareCodesCreated CameraShareCode[] @relation("ShareCodesCreated")
+  shareCodesUsed    CameraShareCode[] @relation("ShareCodesUsed")
 }
 
 model Camera {
@@ -29,6 +32,8 @@ model Camera {
   isOnline    Boolean  @default(false)
   lastSeen    DateTime @default(now())
   createdAt   DateTime @default(now())
+  accesses    CameraAccess[]
+  shareCodes  CameraShareCode[]
 }
 
 model PairingCode {
@@ -39,4 +44,32 @@ model PairingCode {
   used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model CameraAccess {
+  id        String   @id @default(cuid())
+  cameraId  String
+  userId    String
+  role      String   @default("viewer")
+  createdAt DateTime @default(now())
+
+  camera Camera @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cameraId, userId])
+}
+
+model CameraShareCode {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  cameraId     String
+  createdById  String
+  usedById     String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  usedAt       DateTime?
+
+  camera      Camera @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  createdBy   User   @relation("ShareCodesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  usedBy      User?  @relation("ShareCodesUsed", fields: [usedById], references: [id])
 }

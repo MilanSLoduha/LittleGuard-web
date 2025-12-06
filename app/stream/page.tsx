@@ -37,6 +37,10 @@ export default function StreamPage() {
 		saturday: false,
 		sunday: false
 	})
+	const [shareCode, setShareCode] = useState<string | null>(null)
+	const [shareExpiry, setShareExpiry] = useState<string | null>(null)
+	const [shareLoading, setShareLoading] = useState(false)
+	const [shareError, setShareError] = useState<string | null>(null)
 
 	const [streamON, setStreamON] = useState<1 | 0>(0)
 	const ablyRef = useRef<Ably.Realtime | null>(null)
@@ -318,6 +322,34 @@ export default function StreamPage() {
 		})
 	}
 
+	const handleGenerateShareCode = async () => {
+		if (!selectedCamera) return
+		setShareLoading(true)
+		setShareError(null)
+		setShareCode(null)
+		setShareExpiry(null)
+
+		try {
+			const response = await fetch(`/api/cameras/${selectedCamera.id}/share-code`, {
+				method: 'POST'
+			})
+			const data = await response.json().catch(() => ({}))
+
+			if (!response.ok) {
+				setShareError(data?.error || 'Nepodarilo sa vygenerovať kód')
+				return
+			}
+
+			setShareCode(data.code || null)
+			setShareExpiry(data.expiresAt || null)
+		} catch (error) {
+			console.error('Error generating share code:', error)
+			setShareError('Chyba pri generovaní kódu')
+		} finally {
+			setShareLoading(false)
+		}
+	}
+
 
 	return (
 		<main className={styles.main}>
@@ -368,6 +400,27 @@ export default function StreamPage() {
 				<div className={styles.sidebar}>
 
 					<div className={styles.card}>
+						<div className={styles.block}>
+							<h2>Zdie?a? kameru</h2>
+							{shareError && <p className={styles.errorText}>{shareError}</p>}
+							{shareCode && (
+								<div className={styles.shareCodeBox}>
+									<span className={styles.shareCode}>{shareCode}</span>
+									{shareExpiry && (
+										<small className={styles.shareExpiry}>
+											Platn? do {new Date(shareExpiry).toLocaleString()}
+										</small>
+									)}
+								</div>
+							)}
+							<button
+								className={styles.menuButton}
+								onClick={handleGenerateShareCode}
+								disabled={!selectedCamera || shareLoading}
+							>
+								{shareLoading ? 'Generujem...' : 'Vygenerova? k?d'}
+							</button>
+						</div>
 						<div className={styles.block}>
 							<h2>Údaje</h2>
 
