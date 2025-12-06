@@ -13,6 +13,8 @@
   margin-top: 0;
   padding: 1rem 0;
   border-bottom: 1px solid var(--card-border);
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .connected {
@@ -26,15 +28,6 @@
 .header h1 {
   font-size: 2rem;
   font-weight: 700;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--card-border);
 }
 
 .status {
@@ -87,7 +80,7 @@
 .streamWrapper {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: clamp(260px, 55vw, 620px);
   border-radius: 12px;
   overflow: hidden;
   background: #000;
@@ -251,7 +244,8 @@
   justify-content: space-between;
   margin-top: 0.5rem;
   gap: 10px;
-  padding-inline: 30%;
+  padding-inline: 10%;
+  flex-wrap: wrap;
 }
 
 .streamOverlay {
@@ -276,4 +270,92 @@
   height: 100vh;
   font-size: 1.2rem;
   color: var(--text-secondary);
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    height: auto;
+  }
+
+  .streamCard {
+    grid-row: auto;
+  }
+
+  .sidebar {
+    height: auto;
+    max-height: none;
+  }
+
+  .card {
+    max-height: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .main {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .streamButtons {
+    padding-inline: 0;
+    justify-content: center;
+  }
+
+  .menuButton {
+    width: auto;
+    min-width: 7rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+  }
+
+  .streamWrapper {
+    height: clamp(220px, 60vw, 420px);
+  }
+
+  .streamButtons {
+    flex-direction: column;
+  }
+
+  .menuButton {
+    width: 100%;
+  }
+
+  .status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .selectionBox,
+  .switchBox {
+    gap: 10px;
+  }
+
+  .infoBox {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 }

@@ -8,13 +8,14 @@
   letter-spacing: 2px;
   text-align: center;
   user-select: all;
-  width: 80%;
+  width: 100%;
 }
 
 .menuContainer {
   padding-left: 2rem;
   padding-right: 2rem;
   background: var(--background);
+  min-height: 100vh;
 }
 
 .main {
@@ -32,20 +33,13 @@
   margin-top: 0;
   padding: 1rem 0;
   border-bottom: 1px solid var(--card-border);
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .header h1 {
   font-size: 2rem;
   font-weight: 700;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--card-border);
 }
 
 .logoContainer {
@@ -73,6 +67,7 @@
   display: flex;
   align-items: center;
   gap: 32px;
+  flex-wrap: wrap;
 }
 
 .mainContent {
@@ -105,6 +100,7 @@
   align-items: center;
   gap: 16px;
   margin-top: 16px;
+  width: 100%;
 }
 
 .codeButton {
@@ -177,6 +173,7 @@
   justify-content: space-between;
   align-items: center;
   transition: box-shadow 0.2s ease;
+  gap: 12px;
 }
 
 .cameraCard:hover {
@@ -197,6 +194,7 @@
 .cameraActions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .cameraButton {
@@ -208,6 +206,7 @@
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 400;
+  min-width: 110px;
 }
 
 .cameraButton:hover {
@@ -263,4 +262,77 @@
 
 .cancelButton:hover {
   background: #d32f2f;
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    padding: 24px 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .userInfo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pairingSection,
+  .devicesSection {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .menuContainer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+  }
+
+  .mainContent h2 {
+    font-size: 1.5rem;
+  }
+
+  .cameraCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cameraActions {
+    width: 100%;
+  }
+
+  .cameraButton {
+    flex: 1 1 45%;
+    text-align: center;
+  }
+
+  .codeDisplay {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+}
+
+@media (max-width: 520px) {
+  .userInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .codeButton,
+  .logoutButton {
+    width: 100%;
+  }
+
+  .cameraButton {
+    flex: 1 1 100%;
+  }
 }
