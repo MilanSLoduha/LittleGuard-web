@@ -5,6 +5,8 @@ interface CameraSettings {
   mode?: string
   resolution?: string
   quality?: number
+  motorPan?: number
+  motorTilt?: number
   hFlip?: boolean
   hwDownscale?: boolean
   awb?: boolean

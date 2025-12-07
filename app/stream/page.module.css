@@ -179,6 +179,15 @@
   cursor: pointer;
 }
 
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--foreground);
+  border: 2px solid var(--primary);
+}
+
 .switch {
   position: relative;
   display: inline-block;

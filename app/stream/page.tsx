@@ -19,6 +19,8 @@ export default function StreamPage() {
 	const [quality, setQuality] = useState(10)
 	const [brightness, setBrightness] = useState(0)
 	const [contrast, setContrast] = useState(0)
+	const [motorPan, setMotorPan] = useState(0)
+	const [motorTilt, setMotorTilt] = useState(0)
 	const [phoneNumber, setPhoneNumber] = useState('')
 	const [sendSMS, setSendSMS] = useState(false)
 	const [sendEmail, setSendEmail] = useState(false)
@@ -250,6 +252,8 @@ export default function StreamPage() {
 			if (settings.quality !== undefined) setQuality(settings.quality)
 			if (settings.brightness !== undefined) setBrightness(settings.brightness)
 			if (settings.contrast !== undefined) setContrast(settings.contrast)
+			if (settings.motorPan !== undefined) setMotorPan(settings.motorPan)
+			if (settings.motorTilt !== undefined) setMotorTilt(settings.motorTilt)
 			if (settings.phoneNumber) setPhoneNumber(settings.phoneNumber)
 			if (settings.sendSMS !== undefined) setSendSMS(settings.sendSMS)
 			if (settings.sendEmail !== undefined) setSendEmail(settings.sendEmail)
@@ -319,6 +323,14 @@ export default function StreamPage() {
 			sunday: notificatinonDays.sunday,
 			startTime: startTime,
 			endTime: endTime
+		})
+	}
+
+	const handleSendMotor = () => {
+		sendCommand({
+			type: 'motor',
+			pan: motorPan,
+			tilt: motorTilt
 		})
 	}
 
@@ -521,6 +533,31 @@ export default function StreamPage() {
 								onChange={(e) => setContrast(Number(e.target.value))}
 								className={styles.slider}
 							/>
+						</div>
+
+						<div className={styles.block}>
+							<h2>Motory</h2>
+							<label>Pan (do strán)</label>
+							<input
+								type="range"
+								min="-180"
+								max="180"
+								value={motorPan}
+								onChange={(e) => setMotorPan(Number(e.target.value))}
+								className={styles.slider}
+							/>
+							<label>Tilt (hore/dole)</label>
+							<input
+								type="range"
+								min="-90"
+								max="90"
+								value={motorTilt}
+								onChange={(e) => setMotorTilt(Number(e.target.value))}
+								className={styles.slider}
+							/>
+							<button className={styles.saveButton} onClick={handleSendMotor}>
+								Poslať pohyb
+							</button>
 						</div>
 
 						<div className={styles.block}>
