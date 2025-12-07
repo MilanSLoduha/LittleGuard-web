@@ -47,16 +47,6 @@ export default function menuPage() {
     }
   }, [session, status, router])
 
-  if (status === 'loading') {
-    return (
-      <main className={styles.main}>
-        <div className={styles.loading}>
-          <p>NaÄÃ­tavam...</p>
-        </div>
-      </main>
-    )
-  }
-
   const fetchCameras = async () => {
     try {
       const response = await fetch('/api/cameras')
@@ -272,17 +262,35 @@ export default function menuPage() {
     }
   }
 
-  // NaÄÃ­taj kamery
+  // Naèítaj kamery len keï je pouívate¾ prihlásenı
   useEffect(() => {
-    fetchCameras()
-  }, [])
+    if (status === "authenticated") {
+      fetchCameras()
+    }
+  }, [status])
 
   // Refresh kamier
   useEffect(() => {
-    if (pairingSuccess) {
+    if (pairingSuccess && status === "authenticated") {
       fetchCameras()
     }
-  }, [pairingSuccess])
+  }, [pairingSuccess, status])
+
+  // Loading / unauth guards (hooks above remain consistent)
+  if (status === "loading") {
+    return (
+      <main className={styles.main}>
+        <div className={styles.loading}>
+          <p>Naèítavam...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
+
   return (
     <div className={styles.menuContainer}>
       <header className={styles.header}>
@@ -296,13 +304,12 @@ export default function menuPage() {
           <h1>Little Guard</h1>
         </div>
         <div className={styles.userInfo}>
-          <span>{session?.user?.email || 'NaÄÃ­tavam...'}</span>
+          <span>{session?.user?.email || 'Naèítavam...'}</span>
           <button onClick={handleLogout} className={styles.logoutButton}>
-            OdhlÃ¡siÅ¥ sa
+            Odhlási sa
           </button>
         </div>
       </header>
-
       <main className={styles.mainContent}>
         <section className={styles.pairingSection}>
           <h2>PÃ¡rovanie zariadenia</h2>
