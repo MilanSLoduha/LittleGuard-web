@@ -29,8 +29,16 @@ interface CameraSettings {
   endTime?: string
 }
 
-interface MQTTData {
+interface SensorData {
   temperature: number | null
+  pressure: number | null
+  humidity: number | null
+  gas: number | null
+  altitude: number | null
+}
+
+interface MQTTData {
+  sensorData: SensorData
   motion: boolean
   lastMotion: string | null
   isConnected: boolean
@@ -43,7 +51,13 @@ interface MQTTData {
 const normalizeMac = (mac?: string | null) => (mac ? mac.replace(/[^a-fA-F0-9]/g, '').toLowerCase() : '')
 
 export function useMQTT(macAddress?: string): MQTTData {
-  const [temperature, setTemperature] = useState<number | null>(null)
+  const [sensorData, setSensorData] = useState<SensorData>({
+    temperature: null,
+    pressure: null,
+    humidity: null,
+    gas: null,
+    altitude: null
+  })
   const [motion, setMotion] = useState(false)
   const [lastMotion, setLastMotion] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
@@ -120,7 +134,13 @@ export function useMQTT(macAddress?: string): MQTTData {
     const client = mqtt.connect(broker, options)
     clientRef.current = client
 
-    setTemperature(null)
+    setSensorData({
+      temperature: null,
+      pressure: null,
+      humidity: null,
+      gas: null,
+      altitude: null
+    })
     setMotion(false)
     setLastMotion(null)
     setSettings(null)
@@ -207,12 +227,18 @@ export function useMQTT(macAddress?: string): MQTTData {
       const lastMotionTopic = topics?.lastMotion
       const settingsTopic = topics?.settings
 
-      console.log('🔍 Comparing:', { topic, tempTopic, motionTopic, lastMotionTopic, settingsTopic })
-
       if (topic === tempTopic) {
-        const temp = parseFloat(data)
-        if (!isNaN(temp)) {
-          setTemperature(temp)
+        try {
+          const parsed = JSON.parse(data)
+          setSensorData({
+            temperature: parsed.temperature || null,
+            pressure: parsed.pressure || null,
+            humidity: parsed.humidity || null,
+            gas: parsed.gas || null,
+            altitude: parsed.altitude || null
+          })
+        } catch (e) {
+          console.error('Failed to parse sensor data:', e)
         }
       } else if (topic === lastMotionTopic) {
         setLastMotion(data)
@@ -289,7 +315,7 @@ export function useMQTT(macAddress?: string): MQTTData {
   }, [topicPrefix, macNormalized])
 
   return {
-    temperature,
+    sensorData,
     motion,
     lastMotion,
     isConnected,

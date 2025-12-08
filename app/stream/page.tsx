@@ -58,7 +58,7 @@ export default function StreamPage() {
 	const cameraMac = selectedCamera?.macAddress
 	const normalizedMac = cameraMac ? cameraMac.replace(/[^a-fA-F0-9]/g, '').toLowerCase() : ''
 	const ablyChannelName = normalizedMac ? `camera-stream-${normalizedMac}` : null
-	const { temperature, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT(cameraMac)
+	const { sensorData, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT(cameraMac)
 
 	//auth
 	useEffect(() => {
@@ -421,17 +421,35 @@ export default function StreamPage() {
 						<div className={styles.block}>
 							<h2>Údaje</h2>
 
-							<div className={styles.infoBox}>
-								<span>Teplota:</span>
-								<p>{temperature !== null ? `${temperature} °C` : '--.-'}</p>
-							</div>
+					<div className={styles.infoBox}>
+						<span>Teplota:</span>
+						<p>{sensorData.temperature !== null ? `${sensorData.temperature} °C` : '--.-'}</p>
+					</div>
 
-							<div className={styles.infoBox}>
-								<span>Pohyb:</span>
-								<p>{motion ? 'Detekovaný' : 'Žiadny'}</p>
-							</div>
+					<div className={styles.infoBox}>
+						<span>Tlak:</span>
+						<p>{sensorData.pressure !== null ? `${sensorData.pressure.toFixed(1)} hPa` : '--.-'}</p>
+					</div>
 
-							<div className={styles.infoBox}>
+					<div className={styles.infoBox}>
+						<span>Vlhkosť:</span>
+						<p>{sensorData.humidity !== null ? `${sensorData.humidity.toFixed(1)} %` : '--.-'}</p>
+					</div>
+
+					<div className={styles.infoBox}>
+						<span>Plyn:</span>
+						<p>{sensorData.gas !== null ? `${sensorData.gas.toFixed(2)} kΩ` : '--.-'}</p>
+					</div>
+
+					<div className={styles.infoBox}>
+						<span>Nadmorská výška:</span>
+						<p>{sensorData.altitude !== null ? `${sensorData.altitude.toFixed(0)} m` : '--.-'}</p>
+					</div>
+
+					<div className={styles.infoBox}>
+						<span>Pohyb:</span>
+						<p>{motion ? 'Detekovaný' : 'Žiadny'}</p>
+					</div>							<div className={styles.infoBox}>
 								<span>Posledný pohyb:</span>
 								<p>{lastMotion || 'Žiadny'}</p>
 							</div>
