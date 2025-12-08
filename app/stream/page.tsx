@@ -190,8 +190,8 @@ export default function StreamPage() {
 
 			const imgBase64 =
 				(data && data.image) ? data.image :
-				(data && data.data && data.data.image) ? data.data.image :
-				null;
+					(data && data.data && data.data.image) ? data.data.image :
+						null;
 
 			if (imgBase64) {
 				const ImageUrl = `data:image/jpeg;base64,${imgBase64}`;
@@ -491,6 +491,16 @@ export default function StreamPage() {
 							</div>
 
 							<div className={styles.switchBox}>
+								<label>Vertikálne prevrátenie:</label>
+								<input
+									type="checkbox"
+									checked={verticalFlip}
+									onChange={(e) => setVerticalFlip(Boolean(e.target.checked))}
+									className={styles.switch}
+								/>
+							</div>
+
+							<div className={styles.switchBox}>
 								<label>Hardvérové znižovanie rozlíšenia:</label>
 								<input
 									type="checkbox"
@@ -575,6 +585,17 @@ export default function StreamPage() {
 									value={phoneNumber}
 									onChange={(e) => setPhoneNumber(e.target.value)}
 									placeholder="+421 XXX XXX XXX"
+									className={styles.input}
+								/>
+							</div>
+
+							<div className={styles.switchBox}>
+								<label>Email:</label>
+								<input
+									type="email"
+									value={emailAddress}
+									onChange={(e) => setEmailAddress(e.target.value)}
+									placeholder="example@gmail.com"
 									className={styles.input}
 								/>
 							</div>
