@@ -32,6 +32,7 @@ export default function StreamPage() {
 	const [aec, setAec] = useState(false)
 	const [startTime, setStartTime] = useState('00:00')
 	const [endTime, setEndTime] = useState('23:59')
+	const [sensorInterval, setSensorInterval] = useState(5)
 	const [notificatinonDays, setNotificationDays] = useState({
 		monday: false,
 		tuesday: false,
@@ -267,6 +268,7 @@ export default function StreamPage() {
 			if (settings.aec !== undefined) setAec(settings.aec)
 			if (settings.startTime) setStartTime(settings.startTime)
 			if (settings.endTime) setEndTime(settings.endTime)
+			if (settings.sensorInterval !== undefined) setSensorInterval(settings.sensorInterval)
 
 			setNotificationDays({
 				monday: settings.monday ?? false,
@@ -328,7 +330,8 @@ export default function StreamPage() {
 			saturday: notificatinonDays.saturday,
 			sunday: notificatinonDays.sunday,
 			startTime: startTime,
-			endTime: endTime
+			endTime: endTime,
+			sensorInterval: sensorInterval
 		})
 	}
 
@@ -421,43 +424,53 @@ export default function StreamPage() {
 						<div className={styles.block}>
 							<h2>Údaje</h2>
 
-					<div className={styles.infoBox}>
-						<span>Teplota:</span>
-						<p>{sensorData.temperature !== null ? `${sensorData.temperature} °C` : '--.-'}</p>
-					</div>
+							<div className={styles.infoBox}>
+								<span>Teplota:</span>
+								<p>{sensorData.temperature !== null ? `${sensorData.temperature} °C` : '--.-'}</p>
+							</div>
 
-					<div className={styles.infoBox}>
-						<span>Tlak:</span>
-						<p>{sensorData.pressure !== null ? `${sensorData.pressure.toFixed(1)} hPa` : '--.-'}</p>
-					</div>
+							<div className={styles.infoBox}>
+								<span>Tlak:</span>
+								<p>{sensorData.pressure !== null ? `${sensorData.pressure.toFixed(1)} hPa` : '--.-'}</p>
+							</div>
 
-					<div className={styles.infoBox}>
-						<span>Vlhkosť:</span>
-						<p>{sensorData.humidity !== null ? `${sensorData.humidity.toFixed(1)} %` : '--.-'}</p>
-					</div>
+							<div className={styles.infoBox}>
+								<span>Vlhkosť:</span>
+								<p>{sensorData.humidity !== null ? `${sensorData.humidity.toFixed(1)} %` : '--.-'}</p>
+							</div>
 
-					<div className={styles.infoBox}>
-						<span>Plyn:</span>
-						<p>{sensorData.gas !== null ? `${sensorData.gas.toFixed(2)} kΩ` : '--.-'}</p>
-					</div>
+							<div className={styles.infoBox}>
+								<span>Plyn:</span>
+								<p>{sensorData.gas !== null ? `${sensorData.gas.toFixed(2)} kΩ` : '--.-'}</p>
+							</div>
 
-					<div className={styles.infoBox}>
-						<span>Nadmorská výška:</span>
-						<p>{sensorData.altitude !== null ? `${sensorData.altitude.toFixed(0)} m` : '--.-'}</p>
-					</div>
+							<div className={styles.infoBox}>
+								<span>Nadmorská výška:</span>
+								<p>{sensorData.altitude !== null ? `${sensorData.altitude.toFixed(0)} m` : '--.-'}</p>
+							</div>
 
 					<div className={styles.infoBox}>
 						<span>Pohyb:</span>
 						<p>{motion ? 'Detekovaný' : 'Žiadny'}</p>
 					</div>							<div className={styles.infoBox}>
-								<span>Posledný pohyb:</span>
-								<p>{lastMotion || 'Žiadny'}</p>
-							</div>
+						<span>Posledný pohyb:</span>
+						<p>{lastMotion || 'Žiadny'}</p>
+					</div>
 
-						</div>
-						<div className={styles.block}>
+					<div className={styles.switchBox}>
+						<label>Interval merania (minúty):</label>
+						<input
+							type="number"
+							value={sensorInterval}
+							onChange={(e) => setSensorInterval(parseInt(e.target.value) || 1)}
+							min="1"
+							max="60"
+							className={styles.input}
+						/>
+					</div>
 
-							<h2>Nastavenia</h2>
+				</div>
+				<div className={styles.block}>							<h2>Nastavenia</h2>
 
 							<div className={styles.selectionBox}>
 								<label>Režim:</label>
@@ -712,12 +725,12 @@ export default function StreamPage() {
 									type="time"
 									value={endTime}
 									onChange={(e) => setEndTime(e.target.value)}
-									className={styles.input}
-								/>
-							</div>
+								className={styles.input}
+							/>
 						</div>
-						<div className={styles.block}>
-							<h2>Zdieľanie kamery</h2>
+					</div>
+					<div className={styles.block}>
+						<h2>Zdieľanie kamery</h2>
 							{shareError && <p className={styles.errorText}>{shareError}</p>}
 							{shareCode && (
 								<div className={styles.shareCodeBox}>

@@ -27,6 +27,7 @@ interface CameraSettings {
   sunday?: boolean
   startTime?: string
   endTime?: string
+  sensorInterval?: number
 }
 
 interface SensorData {
@@ -43,7 +44,7 @@ interface MQTTData {
   lastMotion: string | null
   isConnected: boolean
   settings: CameraSettings | null
-  sendCommand: (command: { type: string; [key: string]: any }) => void
+  sendCommand: (command: { type: string;[key: string]: any }) => void
   streamControll: (number: 1 | 0) => void
   saveSnapshot: (message: string) => void
 }
@@ -80,7 +81,7 @@ export function useMQTT(macAddress?: string): MQTTData {
   const canPublish = macNormalized.length > 0
 
   const sendCommand = useCallback(
-    (command: { type: string; [key: string]: any }) => {
+    (command: { type: string;[key: string]: any }) => {
       if (clientRef.current && isConnected && clientRef.current.connected && topics?.command && canPublish) {
         clientRef.current.publish(topics.command, JSON.stringify(command))
         console.log('Command sent:', command)
