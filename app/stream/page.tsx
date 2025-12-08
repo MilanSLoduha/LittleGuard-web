@@ -24,7 +24,9 @@ export default function StreamPage() {
 	const [phoneNumber, setPhoneNumber] = useState('')
 	const [sendSMS, setSendSMS] = useState(false)
 	const [sendEmail, setSendEmail] = useState(false)
+	const [emailAddress, setEmailAddress] = useState('')
 	const [horizontalFlip, setHorizontalFlip] = useState(false)
+	const [verticalFlip, setVerticalFlip] = useState(false)
 	const [hwDownscale, setHwDownscale] = useState(false)
 	const [awb, setAwb] = useState(false)
 	const [aec, setAec] = useState(false)
@@ -257,7 +259,9 @@ export default function StreamPage() {
 			if (settings.phoneNumber) setPhoneNumber(settings.phoneNumber)
 			if (settings.sendSMS !== undefined) setSendSMS(settings.sendSMS)
 			if (settings.sendEmail !== undefined) setSendEmail(settings.sendEmail)
+			if (settings.emailAddress) setEmailAddress(settings.emailAddress)
 			if (settings.hFlip !== undefined) setHorizontalFlip(settings.hFlip)
+			if (settings.vFlip !== undefined) setVerticalFlip(settings.vFlip)
 			if (settings.hwDownscale !== undefined) setHwDownscale(settings.hwDownscale)
 			if (settings.awb !== undefined) setAwb(settings.awb)
 			if (settings.aec !== undefined) setAec(settings.aec)
@@ -308,10 +312,12 @@ export default function StreamPage() {
 			brightness: brightness,
 			contrast: contrast,
 			horizontalFlip: horizontalFlip,
+			verticalFlip: verticalFlip,
 			hwDownscale: hwDownscale,
 			awb: awb,
 			aec: aec,
 			phoneNumber: phoneNumber,
+			emailAddress: emailAddress,
 			sendSMS: sendSMS,
 			sendEmail: sendEmail,
 			monday: notificatinonDays.monday,

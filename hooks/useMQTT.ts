@@ -8,12 +8,14 @@ interface CameraSettings {
   motorPan?: number
   motorTilt?: number
   hFlip?: boolean
+  vFlip?: boolean
   hwDownscale?: boolean
   awb?: boolean
   aec?: boolean
   brightness?: number
   contrast?: number
   phoneNumber?: string
+  emailAddress?: string
   sendSMS?: boolean
   sendEmail?: boolean
   monday?: boolean
