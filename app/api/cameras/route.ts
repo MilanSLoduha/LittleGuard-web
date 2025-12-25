@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    // Nájdi usera; ak chýba tabuľka CameraAccess (nemigrované), fallback na pôvodný dotaz
     let user: any = null
     try {
       user = await prisma.user.findUnique({
@@ -41,7 +40,6 @@ export async function GET(req: NextRequest) {
       })
     } catch (err) {
       if (typeof err === 'object' && err !== null && 'code' in err && (err as any).code === 'P2021') {
-        // Tabuľka CameraAccess ešte neexistuje (neprebehol migrate)
         user = await prisma.user.findUnique({
           where: { email: session.user.email },
           include: {

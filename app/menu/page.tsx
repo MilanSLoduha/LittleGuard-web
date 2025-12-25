@@ -84,11 +84,11 @@ export default function menuPage() {
         router.refresh()
       } else {
         const error = await response.json()
-        alert('Chyba pri aktualizacii nazvu kamery: ' + (error.error || 'Neznama chyba'))
+        alert('Chyba pri aktualizácii nazvu kamery: ' + (error.error || 'Neznáma chyba'))
       }
     } catch (error) {
       console.error('Error updating camera name:', error)
-      alert('Chyba pri aktualizacii nazvu kamery')
+      alert('Chyba pri aktualizácii názvu kamery')
     }
   }
 
@@ -125,24 +125,24 @@ export default function menuPage() {
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        setShareError(data?.error || 'Nepodarilo sa pridat kameru')
+        setShareError(data?.error || 'Nepodarilo sa pridať kameru')
         return
       }
 
-      setShareStatus(`Kamera pridana: ${data?.camera?.name || ''}`)
+      setShareStatus(`Kamera pridaná: ${data?.camera?.name || ''}`)
       setShareCode('')
       fetchCameras()
     } catch (error) {
       console.error('Error redeeming share code:', error)
-      setShareError('Chyba pri spracovani kodu')
+      setShareError('Chyba pri spracovaní kódu')
     } finally {
       setShareLoading(false)
     }
   }
 
   const unpairCamera = async (cameraId: string) => {
-    if (unpairConfirm !== 'Odstran') {
-      alert('Pre potvrdenie napis "Odstran"')
+    if (unpairConfirm !== 'Odstráň') {
+      alert('Pre potvrdenie napíš "Odstráň"')
       return
     }
 
@@ -159,11 +159,11 @@ export default function menuPage() {
         fetchCameras()
       } else {
         const error = await response.json()
-        alert('Chyba pri odparovani: ' + (error.error || 'Neznama chyba'))
+        alert('Chyba pri odparovaní: ' + (error.error || 'Neznáma chyba'))
       }
     } catch (error) {
       console.error('Error unpairing camera:', error)
-      alert('Chyba pri odparovani kamery')
+      alert('Chyba pri odparovaní kamery')
     }
   }
 
@@ -187,7 +187,7 @@ export default function menuPage() {
       setRandom(data.code)
     } catch (error) {
       console.error('Error generating code:', error)
-      setPairingError(error instanceof Error ? error.message : 'Chyba pri generovani kodu')
+      setPairingError(error instanceof Error ? error.message : 'Chyba pri generovaní kódu')
       setRandom('------')
     } finally {
       setIsGenerating(false)
@@ -240,11 +240,11 @@ export default function menuPage() {
         }, 2000)
       } else {
         const error = await response.json()
-        setPairingError(error.error || 'Parovanie zlyhalo')
+        setPairingError(error.error || 'Párovanie zlyhalo')
       }
     } catch (error) {
       console.error('Error validating pairing:', error)
-      setPairingError('Chyba pri parovani')
+      setPairingError('Chyba pri párovaní')
     }
   }
 
@@ -266,7 +266,7 @@ export default function menuPage() {
     return (
       <main className={styles.main}>
         <div className={styles.loading}>
-          <p>Nacitavam...</p>
+          <p>Načitavam...</p>
         </div>
       </main>
     )
@@ -284,35 +284,35 @@ export default function menuPage() {
           <h1>Little Guard</h1>
         </div>
         <div className={styles.userInfo}>
-          <span>{session?.user?.email || 'Nacitavam...'}</span>
+          <span>{session?.user?.email || 'Načítavam...'}</span>
           <button onClick={handleLogout} className={styles.logoutButton}>
-            Odhlasit sa
+            Odhlásiť sa
           </button>
         </div>
       </header>
 
       <main className={styles.mainContent}>
         <section className={styles.pairingSection}>
-          <h2>Parovanie zariadenia</h2>
+          <h2>Párovanie zariadenia</h2>
           <p className={styles.instructions}>
-            1. Zapnite kameru (prvy start)
+            1. Zapnite kameru (prvý štart)
             <br />2. Pripojte sa na WiFi kamery (T-SIMCAM-Setup-xxxx)
-            <br />3. Zadajte do prehliadaca adresu 192.168.4.1
-            <br />4. Vygenerujte tento kod a zadajte ho do webstranky kamery pre sparovanie s uctom
+            <br />3. Zadajte do prehliadača adresu 192.168.4.1
+            <br />4. Vygenerujte tento kód a zadajte ho do webstránky kamery pre spárovanie s účtom
           </p>
           {isConnected ? (
-            <p className={styles.mqttStatus}>MQTT pripojene</p>
+            <p className={styles.mqttStatus}>MQTT pripojené</p>
           ) : (
-            <p className={styles.mqttStatusOffline}>MQTT nepripojene</p>
+            <p className={styles.mqttStatusOffline}>MQTT nepripojené</p>
           )}
-          {pairingSuccess && <p className={styles.successMessage}>Kamera uspesne sparovana!</p>}
+          {pairingSuccess && <p className={styles.successMessage}>Kamera úspešne spárovaná!</p>}
           {pairingError && <p className={styles.errorMessage}>{pairingError}</p>}
           <div className={styles.codeContainer}>
             <div className={styles.codeDisplay}>
               <p>{random}</p>
             </div>
             <button className={styles.codeButton} onClick={randomNumber} disabled={isGenerating}>
-              {isGenerating ? 'Generujem...' : 'Vygenerovat novy kod'}
+              {isGenerating ? 'Generujem...' : 'Vygenerovať nový kód'}
             </button>
           </div>
         </section>
@@ -320,9 +320,9 @@ export default function menuPage() {
         <section className={styles.devicesSection}>
           <h2>Moje zariadenia</h2>
           {loadingCameras ? (
-            <p>Nacitavam zariadenia...</p>
+            <p>Načítavam zariadenia...</p>
           ) : cameras.length === 0 ? (
-            <p>Ziadne zariadenia</p>
+            <p>Žiadne zariadenia</p>
           ) : (
             <div className={styles.camerasList}>
               {cameras.map((camera) => (
@@ -354,7 +354,7 @@ export default function menuPage() {
                       onClick={() => startEditingName(camera.id, camera.name)}
                       disabled={editingCamera !== null || unpairingCamera !== null}
                     >
-                      Zmenit nazov
+                      Zmeniť názov
                     </button>
                     <button className={styles.cameraButton} onClick={() => goToStream(camera.id)}>
                       Stream
@@ -374,7 +374,7 @@ export default function menuPage() {
                           onClick={() => unpairCamera(camera.id)}
                           disabled={unpairConfirm !== 'Odstran'}
                         >
-                          Odparovat
+                          Odparovať
                         </button>
                         <button className={styles.cancelButton} onClick={cancelUnpairing}>
                           X
@@ -386,7 +386,7 @@ export default function menuPage() {
                         onClick={() => startUnpairing(camera.id)}
                         disabled={editingCamera !== null}
                       >
-                        Odparovat
+                        Odparovať
                       </button>
                     )}
                   </div>
@@ -397,9 +397,9 @@ export default function menuPage() {
         </section>
 
         <section className={styles.shareSection}>
-          <h2>Pridat uz sparovanu kameru</h2>
+          <h2>Pridať už sparovanú kameru</h2>
           <p className={styles.instructions}>
-            Zadajte zdieany kod zo stranky stream a spristupnite si kameru v tomto ucte.
+            Zadajte zdieľaný kód zo stránky stream a sprístupnite si kameru v tomto účte.
           </p>
           {shareStatus && <p className={styles.successMessage}>{shareStatus}</p>}
           {shareError && <p className={styles.errorMessage}>{shareError}</p>}
@@ -411,7 +411,7 @@ export default function menuPage() {
               className={styles.shareInput}
             />
             <button type="submit" className={styles.shareButton} disabled={shareLoading || !shareCode.trim()}>
-              {shareLoading ? 'Pridavam...' : 'Pridat kameru'}
+              {shareLoading ? 'Pridávam...' : 'Pridať kameru'}
             </button>
           </form>
         </section>

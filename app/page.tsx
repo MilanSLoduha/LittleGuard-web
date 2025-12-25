@@ -11,14 +11,13 @@ export default function HomePage() {
   useEffect(() => {
     if (status === 'loading') return
 
-    if (session) { //logged in
+    if (session) {
       router.push('/menu')
     } else {
       router.push('/login')
     }
   }, [session, status, router])
 
-  // loading tabulecka.
   return (
     <div style={{
       display: 'flex',

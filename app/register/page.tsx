@@ -20,7 +20,24 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    
+
+    const trimmedEmail = formData.email.trim()
+
+    if (trimmedEmail.length === 0) {
+      setError('Email je povinný')
+      return
+    }
+
+    if (trimmedEmail.length > 40) {
+      setError('Email môže mať najviac 40 znakov')
+      return
+    }
+
+    if (formData.password.length < 4 || formData.password.length > 32) {
+      setError('Heslo musí mať 4 až 32 znakov')
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Heslá sa nezhodujú')
       return
@@ -35,7 +52,7 @@ export default function RegisterPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email: formData.email,
+          email: trimmedEmail,
           password: formData.password
         })
       })
@@ -48,7 +65,7 @@ export default function RegisterPage() {
       }
 
       const result = await signIn('credentials', {
-        email: formData.email,
+        email: trimmedEmail,
         password: formData.password,
         redirect: false
       })
@@ -94,6 +111,7 @@ export default function RegisterPage() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              maxLength={40}
               required
               placeholder="vas@email.com"
             />
@@ -106,8 +124,10 @@ export default function RegisterPage() {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              minLength={4}
+              maxLength={32}
               required
-              placeholder="••••••••"
+              placeholder="********"
             />
           </div>
           <div className={styles.formGroup}>
@@ -117,8 +137,10 @@ export default function RegisterPage() {
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              minLength={4}
+              maxLength={32}
               required
-              placeholder="••••••••"
+              placeholder="********"
             />
           </div>
 

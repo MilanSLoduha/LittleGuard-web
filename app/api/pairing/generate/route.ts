@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Nájdi usera
 		const user = await prisma.user.findUnique({
 			where: { email: session.user.email }
 		})
@@ -30,10 +29,8 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Vygeneruj 6-miestny kód
 		const code = Math.floor(100000 + Math.random() * 900000).toString()
 
-		// Vytvor párovací kód s expiráciou 10 minút
 		const expiresAt = new Date()
 		expiresAt.setMinutes(expiresAt.getMinutes() + 10)
 
