@@ -542,10 +542,7 @@ export default function StreamPage() {
 							<label>Kvalita (nižšie = lepšie): {quality}</label>
 							<input
 								type="range"
-								min={selectedResolution === '3' ? '15' : '10'}
-								max="63"
-								value={quality}
-								onChange={(e) => setQuality(Number(e.target.value))}
+					min={getMinQualityForResolution(selectedResolution)}
 								className={styles.slider}
 							/>
 
