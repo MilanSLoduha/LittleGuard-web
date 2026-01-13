@@ -206,7 +206,14 @@ export default function StreamPage() {
 				}
 			} else if (typeof raw === 'string') {
 				try {
-					data = JSON.parse(raw);
+					// First parse the outer message structure
+					const outerData = JSON.parse(raw);
+					// Then parse the escaped JSON string inside "data" field
+					if (outerData && outerData.data && typeof outerData.data === 'string') {
+						data = JSON.parse(outerData.data);
+					} else {
+						data = outerData;
+					}
 					console.log('Ably frame raw string len', raw.length);
 				} catch (err) {
 					console.warn('Ably frame payload is string and JSON.parse failed:', err, 'raw start:', raw?.slice?.(0, 120));
