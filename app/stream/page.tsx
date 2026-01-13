@@ -286,7 +286,15 @@ export default function StreamPage() {
 		if (settings) {
 			if (settings.mode) setSelectedMode(settings.mode)
 			if (settings.resolution) setSelectedResolution(settings.resolution)
-			if (settings.quality !== undefined) setQuality(settings.quality)
+
+			if (settings.quality !== undefined) {
+				const minQualityForResolution = getMinQualityForResolution(selectedResolution)
+				if (settings.quality >= minQualityForResolution) {
+					setQuality(settings.quality)
+				} else {
+					setQuality(minQualityForResolution)
+				}
+			}
 			if (settings.brightness !== undefined) setBrightness(settings.brightness)
 			if (settings.contrast !== undefined) setContrast(settings.contrast)
 			if (settings.motorPan !== undefined) setMotorPan(settings.motorPan)
@@ -315,7 +323,7 @@ export default function StreamPage() {
 				sunday: settings.sunday ?? false
 			})
 		}
-	}, [settings])
+	}, [settings, selectedResolution])
 
 	// Ak sa session načítava alebo nie je prihlásený- loading
 	if (status === 'loading' || !session) {
