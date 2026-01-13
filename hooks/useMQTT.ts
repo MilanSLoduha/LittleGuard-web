@@ -28,6 +28,7 @@ interface CameraSettings {
   startTime?: string
   endTime?: string
   sensorInterval?: number
+  powerSave?: boolean
 }
 
 interface SensorData {
@@ -171,6 +172,8 @@ export function useMQTT(macAddress?: string): MQTTData {
           sunday: false,
           startTime: '00:00',
           endTime: '23:59',
+          sensorInterval: 5,
+          powerSave: false,
         }
         setSettings(defaultSettings)
         console.log('Nastavenie default nastavenia po 10 sekundach - ziadne MQTT setings neprisli')

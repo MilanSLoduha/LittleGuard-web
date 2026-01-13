@@ -33,6 +33,7 @@ export default function StreamPage() {
 	const [startTime, setStartTime] = useState('00:00')
 	const [endTime, setEndTime] = useState('23:59')
 	const [sensorInterval, setSensorInterval] = useState(5)
+	const [powerSave, setPowerSave] = useState(false)
 	const [notificatinonDays, setNotificationDays] = useState({
 		monday: false,
 		tuesday: false,
@@ -269,6 +270,7 @@ export default function StreamPage() {
 			if (settings.startTime) setStartTime(settings.startTime)
 			if (settings.endTime) setEndTime(settings.endTime)
 			if (settings.sensorInterval !== undefined) setSensorInterval(settings.sensorInterval)
+			if (settings.powerSave !== undefined) setPowerSave(settings.powerSave)
 
 			setNotificationDays({
 				monday: settings.monday ?? false,
@@ -331,7 +333,8 @@ export default function StreamPage() {
 			sunday: notificatinonDays.sunday,
 			startTime: startTime,
 			endTime: endTime,
-			sensorInterval: sensorInterval
+			sensorInterval: sensorInterval,
+			powerSave: powerSave
 		})
 	}
 
@@ -510,6 +513,16 @@ export default function StreamPage() {
 								onChange={(e) => setQuality(Number(e.target.value))}
 								className={styles.slider}
 							/>
+
+							<div className={styles.switchBox}>
+								<label>Šetrenie elektriny:</label>
+								<input
+									type="checkbox"
+									checked={powerSave}
+									onChange={(e) => setPowerSave(Boolean(e.target.checked))}
+									className={styles.switch}
+								/>
+							</div>
 
 							<div className={styles.switchBox}>
 								<label>Hotizontálne prevrátenie:</label>
