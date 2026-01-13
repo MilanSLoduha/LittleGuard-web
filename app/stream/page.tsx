@@ -409,7 +409,7 @@ export default function StreamPage() {
 		if (quality < minQuality) {
 			setQuality(minQuality)
 		}
-	}, [selectedResolution, quality])
+	}, [selectedResolution])
 
 
 	return (
