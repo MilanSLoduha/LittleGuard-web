@@ -400,6 +400,17 @@ export default function StreamPage() {
 		}
 	}
 
+	const getMinQualityForResolution = (resolution: string): number => {
+		return resolution === '3' ? 15 : 10
+	}
+
+	useEffect(() => {
+		const minQuality = getMinQualityForResolution(selectedResolution)
+		if (quality < minQuality) {
+			setQuality(minQuality)
+		}
+	}, [selectedResolution, quality])
+
 
 	return (
 		<main className={styles.main}>
