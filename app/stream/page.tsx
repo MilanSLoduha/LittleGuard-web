@@ -288,7 +288,7 @@ export default function StreamPage() {
 			if (settings.resolution) setSelectedResolution(settings.resolution)
 
 			if (settings.quality !== undefined) {
-				const minQualityForResolution = getMinQualityForResolution(selectedResolution)
+				const minQualityForResolution = getMinQualityForResolution(settings.resolution || selectedResolution)
 				if (settings.quality >= minQualityForResolution) {
 					setQuality(settings.quality)
 				} else {
@@ -323,7 +323,7 @@ export default function StreamPage() {
 				sunday: settings.sunday ?? false
 			})
 		}
-	}, [settings, selectedResolution])
+	}, [settings])
 
 	// Ak sa session načítava alebo nie je prihlásený- loading
 	if (status === 'loading' || !session) {
