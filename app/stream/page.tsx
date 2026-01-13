@@ -63,10 +63,6 @@ export default function StreamPage() {
 	const ablyChannelName = normalizedMac ? `camera-stream-${normalizedMac}` : null
 	const { sensorData, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT(cameraMac)
 
-	const getMinQualityForResolution = (resolution: string): number => {
-		return resolution === '3' ? 15 : 10
-	}
-
 	useEffect(() => {
 		if (streamON === 1) {
 			if (streamTimeoutRef.current) {
@@ -196,50 +192,34 @@ export default function StreamPage() {
 
 		channel.subscribe('frame', (message) => {
 			const raw = message.data;
-			let data: any = raw;
+			let imgBase64: string | null = null;
 
 			if (raw instanceof ArrayBuffer || ArrayBuffer.isView(raw)) {
 				try {
 					const decoder = new TextDecoder();
 					const text = decoder.decode(raw as ArrayBuffer);
-					data = JSON.parse(text);
+					// Text should be just the base64 image data
+					imgBase64 = text;
 					console.log('Ably frame decoded from binary, len', text.length);
 				} catch (err) {
 					console.warn('Failed to decode binary Ably frame', err);
-					data = null;
 				}
 			} else if (typeof raw === 'string') {
-				try {
-					// First parse the outer message structure
-					const outerData = JSON.parse(raw);
-					// Then parse the escaped JSON string inside "data" field
-					if (outerData && outerData.data && typeof outerData.data === 'string') {
-						data = JSON.parse(outerData.data);
-					} else {
-						data = outerData;
-					}
-					console.log('Ably frame raw string len', raw.length);
-				} catch (err) {
-					console.warn('Ably frame payload is string and JSON.parse failed:', err, 'raw start:', raw?.slice?.(0, 120));
-					data = null;
-				}
+				// String should be just the base64 image data
+				imgBase64 = raw;
+				console.log('Ably frame string len', raw.length);
 			} else {
 				console.log('Ably frame raw type', typeof raw, raw);
 			}
 
-			const imgBase64 =
-				(data && data.image) ? data.image :
-					(data && data.data && data.data.image) ? data.data.image :
-						null;
-
-			if (imgBase64) {
+			if (imgBase64 && imgBase64.length > 0) {
 				const ImageUrl = `data:image/jpeg;base64,${imgBase64}`;
 				if (imgRef.current) {
 					imgRef.current.src = ImageUrl;
 				}
 				if (!hasFrame) setHasFrame(true);
 			} else {
-				console.log('No image in data after parsing:', data);
+				console.log('No image data received');
 			}
 		})
 
@@ -291,14 +271,7 @@ export default function StreamPage() {
 			if (settings.mode) setSelectedMode(settings.mode)
 			if (settings.resolution) setSelectedResolution(settings.resolution)
 
-			if (settings.quality !== undefined) {
-				const minQualityForResolution = getMinQualityForResolution(settings.resolution || selectedResolution)
-				if (settings.quality >= minQualityForResolution) {
-					setQuality(settings.quality)
-				} else {
-					setQuality(minQualityForResolution)
-				}
-			}
+			if (settings.quality !== undefined) setQuality(settings.quality)
 			if (settings.brightness !== undefined) setBrightness(settings.brightness)
 			if (settings.contrast !== undefined) setContrast(settings.contrast)
 			if (settings.motorPan !== undefined) setMotorPan(settings.motorPan)
@@ -418,14 +391,6 @@ export default function StreamPage() {
 			setShareLoading(false)
 		}
 	}
-
-	useEffect(() => {
-		const minQuality = getMinQualityForResolution(selectedResolution)
-		if (quality < minQuality) {
-			setQuality(minQuality)
-		}
-	}, [selectedResolution])
-
 
 	return (
 		<main className={styles.main}>
@@ -557,7 +522,10 @@ export default function StreamPage() {
 							<label>Kvalita (nižšie = lepšie): {quality}</label>
 							<input
 								type="range"
-					min={getMinQualityForResolution(selectedResolution)}
+								min="10"
+								max="63"
+								value={quality}
+								onChange={(e) => setQuality(Number(e.target.value))}
 								className={styles.slider}
 							/>
 
