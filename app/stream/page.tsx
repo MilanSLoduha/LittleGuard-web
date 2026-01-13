@@ -63,6 +63,10 @@ export default function StreamPage() {
 	const ablyChannelName = normalizedMac ? `camera-stream-${normalizedMac}` : null
 	const { sensorData, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT(cameraMac)
 
+	const getMinQualityForResolution = (resolution: string): number => {
+		return resolution === '3' ? 15 : 10
+	}
+
 	useEffect(() => {
 		if (streamON === 1) {
 			if (streamTimeoutRef.current) {
@@ -413,10 +417,6 @@ export default function StreamPage() {
 		} finally {
 			setShareLoading(false)
 		}
-	}
-
-	const getMinQualityForResolution = (resolution: string): number => {
-		return resolution === '3' ? 15 : 10
 	}
 
 	useEffect(() => {
