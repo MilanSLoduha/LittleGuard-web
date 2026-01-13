@@ -49,6 +49,7 @@ export default function StreamPage() {
 	const [shareError, setShareError] = useState<string | null>(null)
 
 	const [streamON, setStreamON] = useState<1 | 0>(0)
+	const streamTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 	const ablyRef = useRef<Ably.Realtime | null>(null)
 	const ablyChannelRef = useRef<string | null>(null)
 
@@ -61,6 +62,31 @@ export default function StreamPage() {
 	const normalizedMac = cameraMac ? cameraMac.replace(/[^a-fA-F0-9]/g, '').toLowerCase() : ''
 	const ablyChannelName = normalizedMac ? `camera-stream-${normalizedMac}` : null
 	const { sensorData, motion, lastMotion, isConnected, settings, sendCommand, streamControll, saveSnapshot } = useMQTT(cameraMac)
+
+	useEffect(() => {
+		if (streamON === 1) {
+			if (streamTimeoutRef.current) {
+				clearTimeout(streamTimeoutRef.current)
+			}
+
+			streamTimeoutRef.current = setTimeout(() => {
+				console.log('Stream auto-stop after 60 seconds')
+				setStreamON(0)
+				streamControll(0)
+			}, 60000)
+		} else {
+
+			if (streamTimeoutRef.current) {
+				clearTimeout(streamTimeoutRef.current)
+				streamTimeoutRef.current = null
+			}
+		}
+		return () => {
+			if (streamTimeoutRef.current) {
+				clearTimeout(streamTimeoutRef.current)
+			}
+		}
+	}, [streamON, streamControll])
 
 	//auth
 	useEffect(() => {
@@ -417,7 +443,7 @@ export default function StreamPage() {
 						}}>{streamON ? <h1>||</h1> : <h1>&#9658;</h1>}</button>
 						<button className={styles.menuButton} onClick={() => {
 							saveSnapshot("snapshot");
-						}}>Uložiť snapshot</button>
+						}}>Uložiť snímku</button>
 					</div>
 				</div>
 
@@ -473,8 +499,8 @@ export default function StreamPage() {
 					</div>
 
 				</div>
-				<div className={styles.block}>							<h2>Nastavenia</h2>
-
+				<div className={styles.block}>							
+							<h2>Nastavenia</h2>
 							<div className={styles.selectionBox}>
 								<label>Režim:</label>
 								<select
@@ -495,8 +521,6 @@ export default function StreamPage() {
 									onChange={(e) => setSelectedResolution(e.target.value)}
 									className={styles.select}
 								>
-									<option value="1" className={styles.option}>UXGA(1600x1200)</option>
-									<option value="2" className={styles.option}>SXGA(1280x1024)</option>
 									<option value="3" className={styles.option}>XGA(1024x768)</option>
 									<option value="4" className={styles.option}>SVGA(800x600)</option>
 									<option value="5" className={styles.option}>VGA(640x480)</option>
@@ -504,7 +528,7 @@ export default function StreamPage() {
 								</select>
 							</div>
 
-							<label>Kvalita:</label>
+							<label>Kvalita (nižšie = lepšie): {quality}</label>
 							<input
 								type="range"
 								min="10"
@@ -597,7 +621,7 @@ export default function StreamPage() {
 
 						<div className={styles.block}>
 							<h2>Motory</h2>
-							<label>Pan (do strán)</label>
+							<label>Horizontálne otočenie</label>
 							<input
 								type="range"
 								min="-180"
@@ -606,7 +630,7 @@ export default function StreamPage() {
 								onChange={(e) => setMotorPan(Number(e.target.value))}
 								className={styles.slider}
 							/>
-							<label>Tilt (hore/dole)</label>
+							<label>Vertikálne otočenie</label>
 							<input
 								type="range"
 								min="-90"
