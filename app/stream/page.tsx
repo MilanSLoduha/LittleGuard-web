@@ -531,7 +531,7 @@ export default function StreamPage() {
 							<label>Kvalita (nižšie = lepšie): {quality}</label>
 							<input
 								type="range"
-								min="10"
+								min={selectedResolution === '3' ? '15' : '10'}
 								max="63"
 								value={quality}
 								onChange={(e) => setQuality(Number(e.target.value))}
