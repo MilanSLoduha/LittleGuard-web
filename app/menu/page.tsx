@@ -39,6 +39,7 @@ export default function menuPage() {
   const [shareStatus, setShareStatus] = useState<string | null>(null)
   const [shareError, setShareError] = useState<string | null>(null)
   const [shareLoading, setShareLoading] = useState(false)
+  const [pairingInProgress, setPairingInProgress] = useState(false)
 
   const handleLogout = async () => {
     await signOut({ redirect: false })
@@ -196,6 +197,7 @@ export default function menuPage() {
     setIsGenerating(true)
     setPairingError(null)
     setPairingSuccess(false)
+    setPairingInProgress(false)
 
     try {
       const response = await fetch('/api/pairing/generate', { method: 'POST' })
@@ -205,10 +207,12 @@ export default function menuPage() {
       }
       const data = await response.json()
       setRandom(data.code)
+      setPairingInProgress(true)
     } catch (error) {
       console.error('Error generating code:', error)
       setPairingError(error instanceof Error ? error.message : 'Chyba pri generovaní kódu')
       setRandom('------')
+      setPairingInProgress(false)
     } finally {
       setIsGenerating(false)
     }
@@ -255,9 +259,9 @@ export default function menuPage() {
       if (response.ok) {
         setPairingSuccess(true)
         setPairingError(null)
-        setTimeout(() => {
-          router.refresh()
-        }, 2000)
+        setPairingInProgress(false)
+        setRandom('------')
+        fetchCameras()
       } else {
         const error = await response.json()
         setPairingError(error.error || 'Párovanie zlyhalo')
@@ -281,6 +285,26 @@ export default function menuPage() {
       fetchCameras()
     }
   }, [pairingSuccess, status])
+
+  // Polling počas párovania (kamera môže párovať aj cez HTTP submit bez MQTT potvrdenia)
+  useEffect(() => {
+    if (status !== 'authenticated' || !pairingInProgress || random === '------') {
+      return
+    }
+
+    const intervalId = setInterval(() => {
+      fetchCameras()
+    }, 3000)
+
+    const timeoutId = setTimeout(() => {
+      setPairingInProgress(false)
+    }, 120000)
+
+    return () => {
+      clearInterval(intervalId)
+      clearTimeout(timeoutId)
+    }
+  }, [status, pairingInProgress, random])
 
   if (status === 'loading') {
     return (
