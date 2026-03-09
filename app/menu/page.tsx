@@ -29,8 +29,12 @@ export default function menuPage() {
   const [loadingCameras, setLoadingCameras] = useState(true)
   const [editingCamera, setEditingCamera] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
+  const [editError, setEditError] = useState<string | null>(null)
+  const [editSuccess, setEditSuccess] = useState<string | null>(null)
   const [unpairingCamera, setUnpairingCamera] = useState<string | null>(null)
   const [unpairConfirm, setUnpairConfirm] = useState('')
+  const [unpairError, setUnpairError] = useState<string | null>(null)
+  const [unpairSuccess, setUnpairSuccess] = useState<string | null>(null)
   const [shareCode, setShareCode] = useState('')
   const [shareStatus, setShareStatus] = useState<string | null>(null)
   const [shareError, setShareError] = useState<string | null>(null)
@@ -68,9 +72,14 @@ export default function menuPage() {
   const startEditingName = (cameraId: string, currentName: string) => {
     setEditingCamera(cameraId)
     setEditingName(currentName)
+    setEditError(null)
+    setEditSuccess(null)
   }
 
   const saveCameraName = async (cameraId: string) => {
+    setEditError(null)
+    setEditSuccess(null)
+
     try {
       const response = await fetch(`/api/cameras/${cameraId}`, {
         method: 'PATCH',
@@ -79,33 +88,40 @@ export default function menuPage() {
       })
 
       if (response.ok) {
+        setEditSuccess('Názov kamery úspešne aktualizovaný')
         setEditingCamera(null)
         setEditingName('')
-        router.refresh()
+        fetchCameras()
       } else {
         const error = await response.json()
-        alert('Chyba pri aktualizácii nazvu kamery: ' + (error.error || 'Neznáma chyba'))
+        setEditError('Chyba pri aktualizácii nazvu kamery: ' + (error.error || 'Neznáma chyba'))
       }
     } catch (error) {
       console.error('Error updating camera name:', error)
-      alert('Chyba pri aktualizácii názvu kamery')
+      setEditError('Chyba pri aktualizácii názvu kamery')
     }
   }
 
   const cancelEditing = () => {
     setEditingCamera(null)
     setEditingName('')
+    setEditError(null)
+    setEditSuccess(null)
   }
 
   const startUnpairing = (cameraId: string) => {
     setUnpairingCamera(cameraId)
     setUnpairConfirm('')
+    setUnpairError(null)
+    setUnpairSuccess(null)
     setEditingCamera(null)
   }
 
   const cancelUnpairing = () => {
     setUnpairingCamera(null)
     setUnpairConfirm('')
+    setUnpairError(null)
+    setUnpairSuccess(null)
   }
 
   const redeemShareCode = async (e: React.FormEvent) => {
@@ -141,10 +157,13 @@ export default function menuPage() {
   }
 
   const unpairCamera = async (cameraId: string) => {
-    if (unpairConfirm !== 'Odstráň') {
-      alert('Pre potvrdenie napíš "Odstráň"')
+    if (unpairConfirm !== 'Odstran') {
+      setUnpairError('Pre potvrdenie napíš "Odstran"')
       return
     }
+
+    setUnpairError(null)
+    setUnpairSuccess(null)
 
     try {
       const response = await fetch(`/api/cameras/${cameraId}`, {
@@ -154,16 +173,17 @@ export default function menuPage() {
       })
 
       if (response.ok) {
+        setUnpairSuccess('Kamera úspešne odstránená')
         setUnpairingCamera(null)
         setUnpairConfirm('')
         fetchCameras()
       } else {
         const error = await response.json()
-        alert('Chyba pri odparovaní: ' + (error.error || 'Neznáma chyba'))
+        setUnpairError('Chyba pri odparovaní: ' + (error.error || 'Neznáma chyba'))
       }
     } catch (error) {
       console.error('Error unpairing camera:', error)
-      alert('Chyba pri odparovaní kamery')
+      setUnpairError('Chyba pri odparovaní kamery')
     }
   }
 
@@ -319,6 +339,10 @@ export default function menuPage() {
 
         <section className={styles.devicesSection}>
           <h2>Moje zariadenia</h2>
+          {editSuccess && <p className={styles.successMessage}>{editSuccess}</p>}
+          {editError && <p className={styles.errorMessage}>{editError}</p>}
+          {unpairSuccess && <p className={styles.successMessage}>{unpairSuccess}</p>}
+          {unpairError && <p className={styles.errorMessage}>{unpairError}</p>}
           {loadingCameras ? (
             <p>Načítavam zariadenia...</p>
           ) : cameras.length === 0 ? (
