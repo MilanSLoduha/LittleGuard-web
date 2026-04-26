@@ -445,7 +445,7 @@ export default function menuPage() {
         </section>
 
         <section className={styles.shareSection}>
-          <h2>Pridať už sparovanú kameru</h2>
+          <h2>Pridať už spárovanú kameru</h2>
           <p className={styles.instructions}>
             Zadajte zdieľaný kód zo stránky stream a sprístupnite si kameru v tomto účte.
           </p>
